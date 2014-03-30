@@ -2,6 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_margin="@dimen/activity_horizontal_margin"
+    android:gravity="center|top"
     android:orientation="vertical" >
 
     <TextView
@@ -10,7 +12,6 @@
         android:layout_height="wrap_content"
         android:text="@string/default_time"
         android:textSize="56sp"
-        android:paddingTop="30sp"
         android:textColor="#fff"
         android:layout_gravity="center_horizontal" />
     
@@ -21,6 +22,31 @@
         android:text="@string/default_time"
         android:textSize="16sp"
         android:textColor="#fff"
+        android:layout_gravity="center_horizontal" />
+
+    <EditText
+        android:id="@+id/editPass"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="200dp"
+        android:ems="10"
+        android:gravity="center"
+        android:inputType="numberPassword"
+        android:maxLength="4"
+        android:textAlignment="center" >
+
+        <requestFocus />
+    </EditText>
+    
+    <TextView
+        android:id="@+id/tProgress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/default_time"
+        android:textSize="16sp"
+        android:textColor="#fff"
+        android:layout_marginTop="200sp"
         android:layout_gravity="center_horizontal" />
 
 </LinearLayout>

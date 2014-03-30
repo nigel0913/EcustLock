@@ -52,7 +52,8 @@ public class LockService extends Service {
         Log.d(LOG_TAG, "Received start id " + startId + ": " + intent);
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
-		return START_STICKY;
+//		return START_STICKY;
+		return START_REDELIVER_INTENT;
 	}
 	
 	@Override
@@ -85,11 +86,10 @@ public class LockService extends Service {
 		receiverOff = new BroadcastReceiver() {
 			public void onReceive(Context context, Intent intent) {
 				Log.d(LOG_TAG, "receive SCREEN_OFF");
-				if (!LockActivity.isTopRunning(getApplicationContext())) {
+					Log.d(LOG_TAG, "is not TopRunning");
 					Intent startMain = new Intent(context, LockActivity.class);
 					startMain.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 					context.startActivity(startMain);
-				}
 			}
 		};
 //		receiverOn = new BroadcastReceiver() {
