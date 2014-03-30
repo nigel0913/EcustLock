@@ -6,15 +6,16 @@ import java.util.Calendar;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.TextView;
 
 public class LockActivity extends Activity {
@@ -23,13 +24,11 @@ public class LockActivity extends Activity {
 	TextView dateView = null;
 	TextView progressView = null;
 	
-	View mPassView = null;
+	EditText mPassView = null;
 	private int mShortAnimationDuration;
 	
 	DecimalFormat decimalFormat;
-	
-	private final static String PREF_IS_TOP_RUNNING = "ActivityTopRunning";
-	
+	static String[] weekDaysName = { "星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六" };
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		
@@ -47,7 +46,8 @@ public class LockActivity extends Activity {
 		this.timeView = (TextView) super.findViewById(R.id.tTime);
 		this.dateView = (TextView) super.findViewById(R.id.tDate);
 		this.progressView = (TextView) super.findViewById(R.id.tProgress);
-		this.mPassView = findViewById(R.id.editPass);
+		this.mPassView = (EditText) findViewById(R.id.editPass);
+		this.mPassView.addTextChangedListener(new CheckPassword());
 		
 		decimalFormat = new DecimalFormat("00");
 		
@@ -69,32 +69,27 @@ public class LockActivity extends Activity {
 	@Override
     protected void onStart() {
         super.onStart();
-		Calendar c = Calendar.getInstance();
-		this.timeView.setText("" + decimalFormat.format(c.get(Calendar.HOUR_OF_DAY)) + ":" + decimalFormat.format(c.get(Calendar.MINUTE)) );
-		this.dateView.setText("" + decimalFormat.format(c.get(Calendar.MONTH)+1) + "月" + decimalFormat.format(c.get(Calendar.DAY_OF_MONTH))+ "日");
     }
     
 	@Override
 	protected void onResume() {
 		super.onResume();
 		
+		Calendar c = Calendar.getInstance();
+		int weekIndex = c.get(Calendar.DAY_OF_WEEK) - 1;
+		
+		this.timeView.setText("" + decimalFormat.format(c.get(Calendar.HOUR_OF_DAY)) + ":" + decimalFormat.format(c.get(Calendar.MINUTE)) );
+		this.dateView.setText("" + decimalFormat.format(c.get(Calendar.MONTH)+1) + "月"
+			+ decimalFormat.format(c.get(Calendar.DAY_OF_MONTH))+ "日  "
+			+ weekDaysName[weekIndex]);
 		this.mPassView.setVisibility(View.GONE);
+		
 		this.progressView.setAlpha(1f);
 		this.progressView.setVisibility(View.VISIBLE);
 		this.progressView.setText("进度0");
 		AuthenTask ATask = new AuthenTask();
 		ATask.execute(100,30);
 	}
-	
-	@Override
-    protected void onPause() {
-        super.onPause();
-    }
-	
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
 	
     private void crossfade() {
         // Set the content view to 0% opacity but visible, so that it is visible
@@ -123,6 +118,35 @@ public class LockActivity extends Activity {
                 });
     }
     
+    public class CheckPassword implements TextWatcher {
+
+		@Override
+		public void beforeTextChanged(CharSequence s, int start, int count,
+				int after) {
+		}
+
+		@Override
+		public void onTextChanged(CharSequence s, int start, int before,
+				int count) {
+		}
+
+		@Override
+		public void afterTextChanged(Editable s) {
+			try {
+				Log.d("Password", "input: "+s);
+				String lockPass = "6666";
+				if ( s.toString().equals(lockPass) ) {
+					Log.d("Password", "LockActivity finish()");
+					LockActivity.this.finish();
+				}
+			} catch (NumberFormatException nfe) {
+				// none
+			}
+		}
+
+    	
+    }
+    
 	public class AuthenTask extends AsyncTask<Integer, Integer, String> {
 
 		@Override  
@@ -133,7 +157,6 @@ public class LockActivity extends Activity {
 	      
 		@Override
 		protected String doInBackground(Integer... progress) {
-			// TODO Auto-generated method stub
 			String s = "处理成功";
 			for(int i=0;i<=progress[1];i++){  
 	            try {  

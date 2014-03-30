@@ -20,7 +20,6 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		
 		this.toggleService = (Switch) super.findViewById(R.id.service_switch);
-		// TODO set toggleService
 		if (LockService.isRunning(getApplicationContext())) {
 			this.toggleService.setChecked(true);
 		}
@@ -42,7 +41,6 @@ public class MainActivity extends Activity {
 
 		@Override
 		public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-			// TODO Auto-generated method stub
 			Intent service = new Intent(MainActivity.this, LockService.class);
             if (isChecked) {  
     			MainActivity.this.startService(service);
