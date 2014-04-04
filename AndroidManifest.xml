@@ -47,6 +47,11 @@
         <activity
             android:name="com.nigel.ecustlock.MainActivity"
 			android:label="@string/app_name" >
+		</activity>    
+		
+		<activity
+            android:name="com.nigel.ecustlock.PasswordActivity"
+			android:label="@string/app_name" >
 		</activity>        
         
     </application>

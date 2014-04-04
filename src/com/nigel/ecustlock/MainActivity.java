@@ -6,6 +6,9 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
 import android.view.Menu;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.Switch;
@@ -13,6 +16,7 @@ import android.widget.Switch;
 public class MainActivity extends Activity {
 
 	Switch toggleService = null;
+	Button btnUserManager = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -20,6 +24,8 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		
 		this.toggleService = (Switch) super.findViewById(R.id.service_switch);
+		this.btnUserManager = (Button) super.findViewById(R.id.btn_user_manager);
+		
 		if (LockService.isRunning(getApplicationContext())) {
 			this.toggleService.setChecked(true);
 		}
@@ -28,6 +34,7 @@ public class MainActivity extends Activity {
 		}
 		this.toggleService.setOnCheckedChangeListener(new StartServiceOnCheckedChangeListenerImpl());
 		
+		this.btnUserManager.setOnClickListener( new UserManagerOnClickListener() );
 	}
 
 	@Override
@@ -47,6 +54,16 @@ public class MainActivity extends Activity {
             } else {  
     			MainActivity.this.stopService(service);
             }  
+		}
+		
+	}
+	
+	private class UserManagerOnClickListener implements OnClickListener {
+
+		@Override
+		public void onClick(View v) {
+			Intent intent = new Intent(MainActivity.this, PasswordActivity.class);
+			MainActivity.this.startActivity(intent);
 		}
 		
 	}

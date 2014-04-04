@@ -12,6 +12,10 @@
     <string name="str_password">密码</string>
     <string name="str_username">用户名</string>
     <string name="str_login">登陆</string>
+    <string name="str_old_password">原密码</string>
+    <string name="str_new_password">新密码</string>
+    <string name="str_password_comfirm">密码确认</string>
+    <string name="str_modify_password">修改密码</string>
     
 
 </resources>
