@@ -25,8 +25,8 @@ import android.widget.Toast;
 public class LoginActivity extends Activity {
 
 	Button btnLogin = null;
-	EditText tvUsername = null;
-	EditText tvPassword = null;
+	EditText evUsername = null;
+	EditText evPassword = null;
 	
 	/**
 	 * these used for checking file directory
@@ -42,8 +42,8 @@ public class LoginActivity extends Activity {
 		setContentView(R.layout.activity_login);
 		
 		this.btnLogin = (Button) super.findViewById(R.id.btn_login);
-		this.tvUsername = (EditText) super.findViewById(R.id.et_username);
-		this.tvPassword = (EditText) super.findViewById(R.id.et_password);
+		this.evUsername = (EditText) super.findViewById(R.id.et_username);
+		this.evPassword = (EditText) super.findViewById(R.id.et_password);
 		
 		this.btnLogin.setOnClickListener( new LoginOnClickListener() );
 		Init();
@@ -81,11 +81,11 @@ public class LoginActivity extends Activity {
 			
 			// TODO add user name verify
 			
-			if (tvPassword.getText().toString().equals(pwd)) {
+			if (evPassword.getText().toString().equals(pwd)) {
 				Log.v(LOG_TAG, "in");
 				Intent intent = new Intent(LoginActivity.this, MainActivity.class);
 				// TODO modify user_name tags
-				intent.putExtra("user_name", tvUsername.getText().toString());
+				intent.putExtra("user_name", evUsername.getText().toString());
 				LoginActivity.this.startActivity(intent);
 				finish();
 			}
