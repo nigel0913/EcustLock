@@ -16,6 +16,7 @@
     <string name="str_new_password">新密码</string>
     <string name="str_password_comfirm">密码确认</string>
     <string name="str_modify_password">修改密码</string>
+    <string name="str_train">训练</string>
     
 
 </resources>

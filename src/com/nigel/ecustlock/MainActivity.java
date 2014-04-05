@@ -17,6 +17,7 @@ public class MainActivity extends Activity {
 
 	Switch toggleService = null;
 	Button btnUserManager = null;
+	Button btnOpenTrain = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +26,7 @@ public class MainActivity extends Activity {
 		
 		this.toggleService = (Switch) super.findViewById(R.id.service_switch);
 		this.btnUserManager = (Button) super.findViewById(R.id.btn_user_manager);
+		this.btnOpenTrain = (Button) super.findViewById(R.id.btn_open_train);
 		
 		if (LockService.isRunning(getApplicationContext())) {
 			this.toggleService.setChecked(true);
@@ -32,9 +34,10 @@ public class MainActivity extends Activity {
 		else {
 			this.toggleService.setChecked(false);
 		}
-		this.toggleService.setOnCheckedChangeListener(new StartServiceOnCheckedChangeListenerImpl());
+		this.toggleService.setOnCheckedChangeListener( new StartServiceOnCheckedChangeListenerImpl() );
 		
-		this.btnUserManager.setOnClickListener( new UserManagerOnClickListener() );
+		this.btnUserManager.setOnClickListener( new UserManagerOnClickListenerImpl() );
+		this.btnOpenTrain.setOnClickListener( new OpenTrainOnClickListenerImpl() );
 	}
 
 	@Override
@@ -58,11 +61,21 @@ public class MainActivity extends Activity {
 		
 	}
 	
-	private class UserManagerOnClickListener implements OnClickListener {
+	private class UserManagerOnClickListenerImpl implements OnClickListener {
 
 		@Override
 		public void onClick(View v) {
 			Intent intent = new Intent(MainActivity.this, PasswordActivity.class);
+			MainActivity.this.startActivity(intent);
+		}
+		
+	}
+	
+	private class OpenTrainOnClickListenerImpl implements OnClickListener {
+
+		@Override
+		public void onClick(View v) {
+			Intent intent = new Intent(MainActivity.this, TrainActivity.class);
 			MainActivity.this.startActivity(intent);
 		}
 		

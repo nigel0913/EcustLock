@@ -52,7 +52,12 @@
 		<activity
             android:name="com.nigel.ecustlock.PasswordActivity"
 			android:label="@string/app_name" >
-		</activity>        
+		</activity>
+		
+		<activity
+            android:name="com.nigel.ecustlock.TrainActivity"
+			android:label="@string/app_name" >
+		</activity>     
         
     </application>
 
