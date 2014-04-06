@@ -62,7 +62,6 @@ public class TrainActivity extends Activity {
 
 		@Override
 		public void onClick(View v) {
-			// TODO Auto-generated method stub
 			Config.setType(DOTYPE.TRAIN);
 			
 			if (v == btnTrain) {
@@ -70,9 +69,8 @@ public class TrainActivity extends Activity {
 					SRecord.getInstance().closeRecord();
 					SRecord.getInstance().releaseRecord();
 					
-					// TODO mfcc
-//					SThread mfcc = new SThread();
-//					mfcc.getMfcc();
+					SThread mfcc = new SThread();
+					mfcc.getMfcc();
 					
 					btnTrain.setText("¿ªÊ¼Â¼Òô");
 				}

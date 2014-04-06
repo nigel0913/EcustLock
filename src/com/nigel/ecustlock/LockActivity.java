@@ -1,7 +1,12 @@
 package com.nigel.ecustlock;
 
+import java.io.File;
 import java.text.DecimalFormat;
 import java.util.Calendar;
+
+import com.support.Config;
+import com.support.SRecord;
+import com.support.SRecord.EResultType;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -10,6 +15,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -87,11 +93,38 @@ public class LockActivity extends Activity {
 		this.progressView.setAlpha(1f);
 		this.progressView.setVisibility(View.VISIBLE);
 		this.progressView.setText("½ø¶È0");
+		
+		EResultType result = SRecord.getInstance().createRecord();
+		if (result == EResultType.SUCCESS) {
+			SRecord.getInstance().setDirs( Config.getRootDir() + File.separator + Config.getRawPath() );
+			SRecord.getInstance().setFileName( Config.getUserName() );
+			
+			SRecord.getInstance().startRecord();
+		}
+		else {
+			// TODO record device initial failed
+			// try to use the number password
+		}
+		
 		AuthenTask ATask = new AuthenTask();
-		ATask.execute(100,30);
+		ATask.execute(1000,5);
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		if ( SRecord.getInstance().isRecording() ) {
+			SRecord.getInstance().closeRecord();
+			SRecord.getInstance().releaseRecord();
+		}
 	}
 	
     private void crossfade() {
+    	// TODO close record here
+		if ( SRecord.getInstance().isRecording() ) {
+			SRecord.getInstance().closeRecord();
+			SRecord.getInstance().releaseRecord();
+		}
         // Set the content view to 0% opacity but visible, so that it is visible
         // (but fully transparent) during the animation.
     	this.mPassView.setAlpha(0f);
@@ -137,6 +170,7 @@ public class LockActivity extends Activity {
 				String lockPass = "6666";
 				if ( s.toString().equals(lockPass) ) {
 					Log.d("Password", "LockActivity finish()");
+					
 					LockActivity.this.finish();
 				}
 			} catch (NumberFormatException nfe) {
