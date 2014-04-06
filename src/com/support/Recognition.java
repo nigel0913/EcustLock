@@ -7,7 +7,7 @@ public class Recognition {
 	static 
 	{
 		Log.v ("loadLibrary", "start");
-		System.loadLibrary("Ecustlock");
+		System.loadLibrary("EcustLock");
 		Log.v ("loadLibrary", "end");
 	}
 	

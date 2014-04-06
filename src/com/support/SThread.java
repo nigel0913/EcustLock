@@ -32,7 +32,7 @@ public class SThread {
 			}
 
 			Log.v("getMfcc", "start\n"+iFile+"\n"+oFile);
-//			RecognitionTest.getMfcc(iFile, oFile);
+			Recognition.getMfcc(iFile, oFile);
 			Log.v("getMfcc", "end");
 		}
 		
