@@ -18,9 +18,9 @@ public class Recognition {
 	}
 	public static double recognition(String rootPath, String filename)
 	{
-		Log.v("recognition", "start");
+		Log.v("recognition in", "start");
 		double tmp = reco(rootPath, filename);
-		Log.v("recognition", "end "+ tmp);
+		Log.v("recognition in", "end "+ tmp);
 		return tmp;
 	}
 	

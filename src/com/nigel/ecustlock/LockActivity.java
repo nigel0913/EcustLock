@@ -16,11 +16,13 @@ import com.support.SThread;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
+import android.content.Context;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.method.ScrollingMovementMethod;
@@ -50,14 +52,16 @@ public class LockActivity extends Activity {
 	int audioSource = MediaRecorder.AudioSource.MIC;
 	int sampleRateInHz = 8000;
 	int channelConfig = AudioFormat.CHANNEL_IN_MONO;
-	int audioFormat = AudioFormat.ENCODING_PCM_8BIT;
+	int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
 	int bufferSizeInBytes = 0;
 	boolean isRecording = false;
 	AudioRecord audioRecord = null;
 
+	String ac_tag = "activity life";
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-
+		Log.i(ac_tag, "onCreate");
 		super.onCreate(savedInstanceState);
 		Window win = getWindow();
 		WindowManager.LayoutParams winParams = win.getAttributes();
@@ -104,11 +108,13 @@ public class LockActivity extends Activity {
 
 	@Override
 	protected void onStart() {
+		Log.i(ac_tag, "onStart");
 		super.onStart();
 	}
 
 	@Override
 	protected void onResume() {
+		Log.i(ac_tag, "onResume");
 		super.onResume();
 
 		Calendar c = Calendar.getInstance();
@@ -127,31 +133,48 @@ public class LockActivity extends Activity {
 		this.progressView.setAlpha(1f);
 		this.progressView.setVisibility(View.VISIBLE);
 		this.progressView.setText("进度0");
-
-		AuthenTask ATask = new AuthenTask();
-		ATask.execute();
+		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+		boolean isScreenOn = pm.isScreenOn();
+		if (isScreenOn) {
+			AuthenTask ATask = new AuthenTask();
+			ATask.execute();
+		}
 
 	}
 
 	@Override
 	protected void onPause() {
+		Log.i(ac_tag, "onPause");
 		super.onPause();
 	}
+	
+	@Override
+	protected void onStop() {
+		Log.i(ac_tag, "onStop");
+		super.onStop();
+	}
 
-	public boolean onkeyDown(int keyCode, KeyEvent event) {
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		Log.i(ac_tag, "");
 		switch (keyCode) {
-		case KeyEvent.KEYCODE_HOME:
-			isRecording = false;
-			break;
 		case KeyEvent.KEYCODE_BACK:
-			return super.onKeyDown(keyCode, event);
+			isRecording = false;
+			return true;
 		case KeyEvent.KEYCODE_MENU:
-			return super.onKeyDown(keyCode, event);
+			isRecording = false;
+			if (audioRecord != null) {
+				audioRecord.stop();
+				audioRecord.release();
+				audioRecord = null;
+			}
+			crossfade();
+			return true;
 		}
 		return super.onKeyDown(keyCode, event);
 	}
 
-	public class AuthenTask extends AsyncTask<Void, Integer, String> {
+	public class AuthenTask extends AsyncTask<Void, String, String> {
 
 		@Override
 		protected void onPreExecute() {
@@ -198,7 +221,8 @@ public class LockActivity extends Activity {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-
+			
+			this.publishProgress("提取特征...");
 			// mfcc
 			String iFile = Config.getRootDir() + Config.getRawPath()
 					+ File.separator + Config.getUserName()
@@ -218,19 +242,21 @@ public class LockActivity extends Activity {
 			Recognition.getMfcc(iFile, oFile);
 			Log.v("getMfcc", "end");
 
+			this.publishProgress("正在识别...");
 			// recognize
-			score = Recognition.recognition(Config.getRootDir(),
-					Config.getUserName());
-
+			Log.v("recognize result", "start");
+			score = Recognition.recognition(Config.getRootDir(), Config.getUserName());
+			Log.v("recognize result", "end");
+			Log.v("recognize result", ""+score);
 			return result + score;
 		}
 
 		@Override
-		protected void onProgressUpdate(Integer... progress) {
+		protected void onProgressUpdate(String... progress) {
 			// 这个函数在doInBackground调用publishProgress时触发，虽然调用时只有一个参数
 			// 但是这里取到的是一个数组,所以要用progesss[0]来取值
 			// 第n个参数就用progress[n]来取值
-			// LockActivity.this.progressView.setText("时间："+progress[0]+"s");
+			LockActivity.this.progressView.setText("状态："+progress[0]);
 			super.onProgressUpdate(progress);
 		}
 
@@ -239,14 +265,25 @@ public class LockActivity extends Activity {
 			// doInBackground返回时触发，换句话说，就是doInBackground执行完后触发
 			// 这里的result就是上面doInBackground执行后的返回值，所以这里是"执行完毕"
 			LockActivity.this.progressView.setText(result);
-			crossfade();
+			
 			super.onPostExecute(result);
 		}
 
 	}
 
 	private void crossfade() {
-
+		// Animate the loading view to 0% opacity. After the animation ends,
+		// set its visibility to GONE as an optimization step (it won't
+		// participate in layout passes, etc.)
+		this.progressView.animate().alpha(0f)
+				.setDuration(0)
+				.setListener(new AnimatorListenerAdapter() {
+					@Override
+					public void onAnimationEnd(Animator animation) {
+						progressView.setVisibility(View.GONE);
+					}
+				});
+		
 		// Set the content view to 0% opacity but visible, so that it is visible
 		// (but fully transparent) during the animation.
 		this.mPassView.setAlpha(0f);
@@ -257,17 +294,6 @@ public class LockActivity extends Activity {
 		this.mPassView.animate().alpha(1f).setDuration(mShortAnimationDuration)
 				.setListener(null);
 
-		// Animate the loading view to 0% opacity. After the animation ends,
-		// set its visibility to GONE as an optimization step (it won't
-		// participate in layout passes, etc.)
-		this.progressView.animate().alpha(0f)
-				.setDuration(mShortAnimationDuration)
-				.setListener(new AnimatorListenerAdapter() {
-					@Override
-					public void onAnimationEnd(Animator animation) {
-						progressView.setVisibility(View.GONE);
-					}
-				});
 	}
 
 	public class CheckPassword implements TextWatcher {

@@ -57,6 +57,7 @@ public class LockService extends Service {
 		Log.d(LOG_TAG, "onDestroy()");
 		super.onDestroy();
 		setRunning(false);
+		unregisterReceiver(receiverOff);
 		stopForeground(true);
 		Toast.makeText(getApplicationContext(), "声音认证服务已经关闭", Toast.LENGTH_SHORT).show();
 	}
