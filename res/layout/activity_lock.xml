@@ -34,11 +34,19 @@
         android:gravity="center"
         android:inputType="numberPassword"
         android:maxLength="4"
-        android:textAlignment="center" >
+        android:textAlignment="center"
+        android:visibility="gone" >
 
         <requestFocus />
     </EditText>
     
+    <ProgressBar
+        android:id="@+id/pbCircle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="160sp"
+        android:visibility="invisible" />
+
     <TextView
         android:id="@+id/tProgress"
         android:layout_width="wrap_content"
@@ -46,7 +54,6 @@
         android:text="@string/default_time"
         android:textSize="16sp"
         android:textColor="#fff"
-        android:layout_marginTop="200sp"
         android:layout_gravity="center_horizontal" />
 
 </LinearLayout>

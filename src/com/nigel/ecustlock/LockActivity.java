@@ -33,6 +33,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class LockActivity extends Activity {
@@ -42,11 +43,15 @@ public class LockActivity extends Activity {
 	TextView progressView = null;
 
 	EditText mPassView = null;
+	ProgressBar pbCircle = null;
+	
 	private int mShortAnimationDuration;
 
 	DecimalFormat decimalFormat;
 	static String[] weekDaysName = { "星期日", "星期一", "星期二", "星期三", "星期四", "星期五",
 			"星期六" };
+	
+	static String[] statusString = { "正在录音...", "正在提取特征...", "正在识别..."};
 
 	double score = -1;
 	int audioSource = MediaRecorder.AudioSource.MIC;
@@ -76,12 +81,14 @@ public class LockActivity extends Activity {
 		this.dateView = (TextView) super.findViewById(R.id.tDate);
 		this.progressView = (TextView) super.findViewById(R.id.tProgress);
 		this.mPassView = (EditText) findViewById(R.id.editPass);
+		this.pbCircle = (ProgressBar) super.findViewById(R.id.pbCircle);
 		this.mPassView.addTextChangedListener(new CheckPassword());
 
 		decimalFormat = new DecimalFormat("00");
 
 		// Initially hide the content view.
 		this.mPassView.setVisibility(View.GONE);
+		
 		// Retrieve and cache the system's default "short" animation time.
 		mShortAnimationDuration = getResources().getInteger(
 				android.R.integer.config_shortAnimTime);
@@ -108,7 +115,7 @@ public class LockActivity extends Activity {
 
 	@Override
 	protected void onStart() {
-		Log.i(ac_tag, "onStart");
+//		Log.i(ac_tag, "onStart");
 		super.onStart();
 	}
 
@@ -130,6 +137,7 @@ public class LockActivity extends Activity {
 
 		this.mPassView.setVisibility(View.GONE);
 
+		this.pbCircle.setVisibility(View.INVISIBLE);
 		this.progressView.setAlpha(1f);
 		this.progressView.setVisibility(View.VISIBLE);
 		this.progressView.setText("进度0");
@@ -144,19 +152,19 @@ public class LockActivity extends Activity {
 
 	@Override
 	protected void onPause() {
-		Log.i(ac_tag, "onPause");
+//		Log.i(ac_tag, "onPause");
 		super.onPause();
 	}
 	
 	@Override
 	protected void onStop() {
-		Log.i(ac_tag, "onStop");
+//		Log.i(ac_tag, "onStop");
 		super.onStop();
 	}
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		Log.i(ac_tag, "");
+//		Log.i(ac_tag, "");
 		switch (keyCode) {
 		case KeyEvent.KEYCODE_BACK:
 			isRecording = false;
@@ -174,7 +182,7 @@ public class LockActivity extends Activity {
 		return super.onKeyDown(keyCode, event);
 	}
 
-	public class AuthenTask extends AsyncTask<Void, String, String> {
+	public class AuthenTask extends AsyncTask<Void, Integer, String> {
 
 		@Override
 		protected void onPreExecute() {
@@ -185,6 +193,7 @@ public class LockActivity extends Activity {
 		@Override
 		protected String doInBackground(Void... progress) {
 			String result = "得分为：";
+			this.publishProgress(0);
 
 			byte[] audioData = new byte[bufferSizeInBytes];
 			int readsize = 0;
@@ -222,7 +231,7 @@ public class LockActivity extends Activity {
 				e.printStackTrace();
 			}
 			
-			this.publishProgress("提取特征...");
+			this.publishProgress(1);
 			// mfcc
 			String iFile = Config.getRootDir() + Config.getRawPath()
 					+ File.separator + Config.getUserName()
@@ -242,7 +251,7 @@ public class LockActivity extends Activity {
 			Recognition.getMfcc(iFile, oFile);
 			Log.v("getMfcc", "end");
 
-			this.publishProgress("正在识别...");
+			this.publishProgress(2);
 			// recognize
 			Log.v("recognize result", "start");
 			score = Recognition.recognition(Config.getRootDir(), Config.getUserName());
@@ -252,11 +261,20 @@ public class LockActivity extends Activity {
 		}
 
 		@Override
-		protected void onProgressUpdate(String... progress) {
+		protected void onProgressUpdate(Integer... progress) {
 			// 这个函数在doInBackground调用publishProgress时触发，虽然调用时只有一个参数
 			// 但是这里取到的是一个数组,所以要用progesss[0]来取值
 			// 第n个参数就用progress[n]来取值
-			LockActivity.this.progressView.setText("状态："+progress[0]);
+			if (progress[0] == 1) {
+				pbCircle.animate().alpha(1f).setDuration(0)
+						.setListener(new AnimatorListenerAdapter() {
+							@Override
+							public void onAnimationEnd(Animator animation) {
+								pbCircle.setVisibility(View.VISIBLE);
+							}
+						});
+			}
+			LockActivity.this.progressView.setText(statusString[ progress[0] ]);
 			super.onProgressUpdate(progress);
 		}
 
@@ -264,6 +282,13 @@ public class LockActivity extends Activity {
 		protected void onPostExecute(String result) {
 			// doInBackground返回时触发，换句话说，就是doInBackground执行完后触发
 			// 这里的result就是上面doInBackground执行后的返回值，所以这里是"执行完毕"
+			pbCircle.animate().alpha(0f).setDuration(0)
+					.setListener(new AnimatorListenerAdapter() {
+						@Override
+						public void onAnimationEnd(Animator animation) {
+							pbCircle.setVisibility(View.INVISIBLE);
+						}
+					});
 			LockActivity.this.progressView.setText(result);
 			
 			super.onPostExecute(result);
