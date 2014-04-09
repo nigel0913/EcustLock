@@ -13,11 +13,12 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.Switch;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements OnClickListener {
 
 	Switch toggleService = null;
 	Button btnUserManager = null;
 	Button btnOpenTrain = null;
+	Button btnConfig = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +28,7 @@ public class MainActivity extends Activity {
 		this.toggleService = (Switch) super.findViewById(R.id.service_switch);
 		this.btnUserManager = (Button) super.findViewById(R.id.btn_user_manager);
 		this.btnOpenTrain = (Button) super.findViewById(R.id.btn_open_train);
+		this.btnConfig = (Button) super.findViewById(R.id.btn_config);
 		
 		if (LockService.isRunning(getApplicationContext())) {
 			this.toggleService.setChecked(true);
@@ -36,8 +38,9 @@ public class MainActivity extends Activity {
 		}
 		this.toggleService.setOnCheckedChangeListener( new StartServiceOnCheckedChangeListenerImpl() );
 		
-		this.btnUserManager.setOnClickListener( new UserManagerOnClickListenerImpl() );
-		this.btnOpenTrain.setOnClickListener( new OpenTrainOnClickListenerImpl() );
+		this.btnUserManager.setOnClickListener(this);
+		this.btnOpenTrain.setOnClickListener(this);
+		this.btnConfig.setOnClickListener(this);
 	}
 
 	@Override
@@ -61,24 +64,25 @@ public class MainActivity extends Activity {
 		
 	}
 	
-	private class UserManagerOnClickListenerImpl implements OnClickListener {
-
-		@Override
-		public void onClick(View v) {
-			Intent intent = new Intent(MainActivity.this, PasswordActivity.class);
-			MainActivity.this.startActivity(intent);
+	@Override
+	public void onClick(View v) {
+		int id = v.getId();
+		Intent intent = null;
+		switch (id) {
+			case R.id.btn_config:
+				intent = new Intent(MainActivity.this, ConfigActivity.class);
+				MainActivity.this.startActivity(intent);
+				break;
+			case R.id.btn_open_train:
+				intent = new Intent(MainActivity.this, TrainActivity.class);
+				MainActivity.this.startActivity(intent);
+				break;
+			case R.id.btn_user_manager:
+				intent = new Intent(MainActivity.this, PasswordActivity.class);
+				MainActivity.this.startActivity(intent);
+			default:
+				break;
 		}
-		
-	}
-	
-	private class OpenTrainOnClickListenerImpl implements OnClickListener {
-
-		@Override
-		public void onClick(View v) {
-			Intent intent = new Intent(MainActivity.this, TrainActivity.class);
-			MainActivity.this.startActivity(intent);
-		}
-		
 	}
 
 }
