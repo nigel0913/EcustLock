@@ -10,7 +10,11 @@ public class Config {
 	static String modelPath = "model";
 	static String testFeaturePath = "testFeature";
 	static String rawPath = "raw";
+	static String lastTrainSetting = "lastTrainSetting";
 	
+	public static String getLastTrainSetting() {
+		return lastTrainSetting;
+	}
 	static String userName = "1";
 	
 	public enum DOTYPE {

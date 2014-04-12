@@ -35,46 +35,117 @@ void processMAP(const Mixture& world, Mixture& client, MixtureStat& clientStat);
 double test(Config config, char* testFeaturePath, char* worldPath, char* modelPath, char* filename);
 double c_recognition(char* rootPath, char* filename);
 
-JNIEXPORT jdouble JNICALL Java_com_support_Recognition_reco  (JNIEnv * env, jclass j, jstring rootPath, jstring filename)
+/*
+ * Class:     com_support_Recognition
+ * Method:    jniTrainGmm
+ * Signature: (Ljava/lang/String;Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_com_support_Recognition_jniTrainGmm(JNIEnv * env, jclass j, jstring rootPath, jstring filename)
 {
 	char* path = (char*)env->GetStringUTFChars(rootPath, 0);
 	char* name = (char*)env->GetStringUTFChars(filename, 0);
-	return c_recognition(path, name);
+	
+	/*
+		配置目录
+	*/
+	char featurePath[N], modelPath[N], worldPath[N], testFeaturePath[N];
+//	strcpy(rootPath, ".");
+	sprintf(featurePath, "%s/feature/", path);
+	sprintf(worldPath, "%s/world/", path);
+	sprintf(modelPath, "%s/model/", path);
+	sprintf(testFeaturePath, "%s/testFeature/", path);
+
+	/*
+		配置向量大小,分布敿文件吿
+	*/
+	char vectSize[10], distribCount[10];
+	strcpy(vectSize, "26");
+	strcpy(distribCount, "1024");
+//	strcpy(filename, "1");
+
+	Config config;
+	/*
+		配置FeatureServer
+	*/
+	config.setParam("loadFeatureFileFormat", "RAW");
+	config.setParam("loadFeatureFileExtension", ".mfcc");
+	config.setParam("loadFeatureFileVectSize", vectSize);
+	config.setParam("featureServerMemAlloc", "100000");
+
+	/*
+		配置MixtureServer StatServer
+	*/
+	config.setParam("vectSize",vectSize);
+	config.setParam("mixtureDistribCount", distribCount);
+	config.setParam("topDistribsCount", distribCount);
+	config.setParam("computeLLKWithTopDistribs", "PARTIAL");
+	config.setParam("loadMixtureFileFormat", "RAW");
+	config.setParam("loadMixtureFileExtension", ".mdl");
+	config.setParam("saveMixtureFileFormat", "RAW");
+	config.setParam("saveMixtureFileExtension", ".mdl");
+	config.setParam("minLLK", "-100");
+	config.setParam("maxLLK", "100");
+	config.setParam("distribType", "GD");
+	
+	trainGMM(config, worldPath, featurePath, modelPath, name);
 }
 
-JNIEXPORT void JNICALL Java_com_support_Recognition_writeFile(JNIEnv * env, jclass j, jstring inFile, jstring outFile)
+/*
+ * Class:     com_support_Recognition
+ * Method:    jniTest
+ * Signature: (Ljava/lang/String;Ljava/lang/String;)D
+ */
+JNIEXPORT jdouble JNICALL Java_com_support_Recognition_jniTest(JNIEnv * env, jclass j, jstring rootPath, jstring filename)
 {
-	char* inName = (char*)env->GetStringUTFChars(inFile, 0);
-	char* outName = (char*)env->GetStringUTFChars(outFile, 0);
-	const int inLength = 1024;
-	const int outLength = 26;
-	float dOut[outLength];
-	char dIn[inLength];
-	double x[inLength], y[outLength];
-	FILE *pFin, *pFout;
-	pFin = fopen(inName, "rb");
-	pFout = fopen(outName, "wb");
-	if ( !pFin ) {
-		return ;
-	}
-	size_t readNum = 0;
-	while (true) {
-		readNum = fread(dIn, sizeof(char), inLength, pFin);
-		if (readNum < inLength)
-			break;
-		for (int i=0; i<inLength; i++)
-			x[i] = dIn[i];
-		mfcc(x, y);
-		for (int i=0; i<outLength; i++)
-			dOut[i] = y[i];
-		fwrite(dOut, sizeof(float), outLength, pFout);
-	}
+	char* path = (char*)env->GetStringUTFChars(rootPath, 0);
+	char* name = (char*)env->GetStringUTFChars(filename, 0);
+	
+	/*
+		配置目录
+	*/
+	char featurePath[N], modelPath[N], worldPath[N], testFeaturePath[N];
+//	strcpy(rootPath, ".");
+	sprintf(featurePath, "%s/feature/", path);
+	sprintf(worldPath, "%s/world/", path);
+	sprintf(modelPath, "%s/model/", path);
+	sprintf(testFeaturePath, "%s/testFeature/", path);
 
-	fclose(pFin);
-	fclose(pFout);
+	/*
+		配置向量大小,分布敿文件吿
+	*/
+	char vectSize[10], distribCount[10];
+	strcpy(vectSize, "26");
+	strcpy(distribCount, "1024");
+//	strcpy(filename, "1");
+
+	Config config;
+	/*
+		配置FeatureServer
+	*/
+	config.setParam("loadFeatureFileFormat", "RAW");
+	config.setParam("loadFeatureFileExtension", ".mfcc");
+	config.setParam("loadFeatureFileVectSize", vectSize);
+	config.setParam("featureServerMemAlloc", "100000");
+
+	/*
+		配置MixtureServer StatServer
+	*/
+	config.setParam("vectSize",vectSize);
+	config.setParam("mixtureDistribCount", distribCount);
+	config.setParam("topDistribsCount", distribCount);
+	config.setParam("computeLLKWithTopDistribs", "PARTIAL");
+	config.setParam("loadMixtureFileFormat", "RAW");
+	config.setParam("loadMixtureFileExtension", ".mdl");
+	config.setParam("saveMixtureFileFormat", "RAW");
+	config.setParam("saveMixtureFileExtension", ".mdl");
+	config.setParam("minLLK", "-100");
+	config.setParam("maxLLK", "100");
+	config.setParam("distribType", "GD");
+	
+	double score = test(config, testFeaturePath, worldPath, modelPath, name);
+	return score;
+
 }
-
-
 
 double c_recognition(char* rootPath, char* filename)
 {

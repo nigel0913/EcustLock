@@ -9,18 +9,18 @@ extern "C" {
 #endif
 /*
  * Class:     com_support_Recognition
- * Method:    writeFile
+ * Method:    jniTrainGmm
  * Signature: (Ljava/lang/String;Ljava/lang/String;)V
  */
-JNIEXPORT void JNICALL Java_com_support_Recognition_writeFile
+JNIEXPORT void JNICALL Java_com_support_Recognition_jniTrainGmm
   (JNIEnv *, jclass, jstring, jstring);
 
 /*
  * Class:     com_support_Recognition
- * Method:    reco
+ * Method:    jniTest
  * Signature: (Ljava/lang/String;Ljava/lang/String;)D
  */
-JNIEXPORT jdouble JNICALL Java_com_support_Recognition_reco
+JNIEXPORT jdouble JNICALL Java_com_support_Recognition_jniTest
   (JNIEnv *, jclass, jstring, jstring);
 
 #ifdef __cplusplus

@@ -11,17 +11,15 @@ public class Recognition {
 		Log.v ("loadLibrary", "end");
 	}
 	
-	private native static void writeFile(String inFile, String outFile);
-	private native static double reco(String rootPath, String filename);
-	public static void getMfcc(String inFile, String outFile) {
-		writeFile(inFile, outFile);
+	private native static void jniTrainGmm(String rootPath, String filename);
+	private native static double jniTest(String rootPath, String filename);
+	
+	public static void TrainGmm(String rootPath, String filename) {
+		jniTrainGmm(rootPath, filename);
 	}
-	public static double recognition(String rootPath, String filename)
-	{
-		Log.v("recognition in", "start");
-		double tmp = reco(rootPath, filename);
-		Log.v("recognition in", "end "+ tmp);
-		return tmp;
+	public static double Test(String rootPath, String filename) {
+		return jniTest(rootPath, filename);
 	}
+	
 	
 }

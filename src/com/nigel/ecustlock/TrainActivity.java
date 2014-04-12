@@ -9,8 +9,12 @@ import java.io.PrintWriter;
 
 import com.support.Config;
 import com.support.GetMfcc;
+import com.support.Recognition;
+import com.support.Test;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
@@ -104,10 +108,12 @@ public class TrainActivity extends Activity {
 
 	}
 	
-	public class MfccTask extends AsyncTask<Void, Void, String> {
+	public class MfccTask extends AsyncTask<Void, String, String> {
 
 		@Override
 		protected String doInBackground(Void... progress) {
+			this.publishProgress("正在录音...");
+			
 			short[] audioData = new short[bufferSizeInBytes/2];
 			int readsize = 0;
 			FileOutputStream fos = null;
@@ -115,6 +121,17 @@ public class TrainActivity extends Activity {
 			DataOutputStream dos_bak = null;
 			PrintWriter writer = null;
 			GetMfcc getMfcc = new GetMfcc();
+			
+			//--------------------------------
+			Test test = new Test();
+			test.startBackupTrain(Config.getRootDir() + Config.getRawPath());
+			SharedPreferences sharedPref = getSharedPreferences(getString(R.string.s_settingsPreferences), Context.MODE_PRIVATE);
+			String key = Config.getLastTrainSetting();
+			SharedPreferences.Editor editor = sharedPref.edit();
+			editor.putString(key, test.getTrainDirPath());
+			editor.commit();
+			//------------------------------------
+			
 			try {
 				File file = new File(Config.getRootDir() + Config.getFeaturePath()
 						+ File.separator + Config.getUserName()
@@ -147,6 +164,10 @@ public class TrainActivity extends Activity {
 				if (AudioRecord.ERROR_INVALID_OPERATION != readsize
 						&& AudioRecord.ERROR_BAD_VALUE != readsize) {
 
+					test.backupShortData(
+							test.getTrainDirPath() + File.separator + Config.getUserName()+".short",
+							audioData, 
+							readsize);
 					for (int i=0; i<readsize; i++){
 						inSamples[i] = audioData[i];
 					}
@@ -157,6 +178,19 @@ public class TrainActivity extends Activity {
 						if (ans != null) {
 							int height = getMfcc.getFramenum();
 							int width = getMfcc.getDimension();
+							
+							// next is used for backup mfcc
+							float[] backupData = new float[width];
+							for (int i=0; i<height; i++) {
+								for (int j=0; j<width; j++) {
+									backupData[j] = (float) ans[i+1][j+1];
+								}
+								test.backupFloatData(
+										test.getTrainDirPath() + File.separator + Config.getUserName()+".mfcc",
+										backupData,
+										width);
+							}
+							
 							float tmp = 0;
 							for (int i=0; i<height; i++){
 								for (int j=0; j<width; j++) {
@@ -188,7 +222,19 @@ public class TrainActivity extends Activity {
 				e.printStackTrace();
 			}
 			
+			
+			this.publishProgress("正在训练模型...");
+			Recognition.TrainGmm(Config.getRootDir(), Config.getUserName());
+			
 			return "训练完成";
+		}
+		
+		@Override
+		protected void onProgressUpdate(String... values) {
+			
+			TrainActivity.this.tvInfo.setText(values[0]);
+			
+			super.onProgressUpdate(values);
 		}
 		
 		@Override

@@ -3,22 +3,19 @@ package com.nigel.ecustlock;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
 import java.util.Calendar;
 
 import com.support.Config;
-import com.support.Config.DOTYPE;
 import com.support.GetMfcc;
 import com.support.Recognition;
-import com.support.SRecord;
-import com.support.SRecord.EResultType;
-import com.support.SThread;
+import com.support.Test;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -30,7 +27,6 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -51,13 +47,15 @@ public class LockActivity extends Activity {
 	EditText mPassView = null;
 	ProgressBar pbCircle = null;
 	
+	Test test = null;
+	
 	private int mShortAnimationDuration;
 
 	DecimalFormat decimalFormat;
 	static String[] weekDaysName = { "星期日", "星期一", "星期二", "星期三", "星期四", "星期五",
 			"星期六" };
 	
-	static String[] statusString = { "正在录音...", "正在提取特征...", "正在识别..."};
+	static String[] statusString = { "正在录音...", "正在识别..."};
 
 	double score = -1;
 	int audioSource = MediaRecorder.AudioSource.MIC;
@@ -226,6 +224,16 @@ public class LockActivity extends Activity {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+						
+			// ----------------------
+			SharedPreferences sharedPref = getSharedPreferences(getString(R.string.s_settingsPreferences), Context.MODE_PRIVATE);
+			String key = Config.getLastTrainSetting();
+			String testRoot = sharedPref.getString(key, "");
+			Log.v("testRoot", testRoot);
+			test = new Test();
+			test.startBackupAuth(testRoot);
+			// ------------------------------------
+			
 			double[] inSamples = new double[1024];
 			while (isRecording == true) {
 				readsize = audioRecord.read(audioData, 0, bufferSizeInBytes/2);
@@ -235,6 +243,10 @@ public class LockActivity extends Activity {
 
 					// TODO vad
 					// isRecording = false;
+					test.backupShortData(
+							test.getAuthDirPath() + File.separator + Config.getUserName()+".short",
+							audioData, 
+							readsize);
 					for (int i=0; i<readsize; i++){
 						inSamples[i] = audioData[i];
 					}
@@ -242,11 +254,27 @@ public class LockActivity extends Activity {
 					try {
 						byte xx[] = new byte[4];
 						double[][] ans = getMfcc.mfcc(inSamples, readsize);
+						
 						if (ans != null) {
+							
 							int height = getMfcc.getFramenum();
+							int width = getMfcc.getDimension();
 							float tmp = 0;
+							
+							// next is used for backup mfcc
+							float[] backupData = new float[width];
+							for (int i=0; i<height; i++) {
+								for (int j=0; j<width; j++) {
+									backupData[j] = (float) ans[i+1][j+1];
+								}
+								test.backupFloatData(
+										test.getAuthDirPath() + File.separator + Config.getUserName()+".mfcc",
+										backupData,
+										width);
+							}
+								
 							for (int i=0; i<height; i++){
-								for (int j=0; j<getMfcc.getDimension(); j++) {
+								for (int j=0; j<width; j++) {
 									
 									tmp = (float) ans[i+1][j+1];
 									int tmpInt = Float.floatToIntBits(tmp);
@@ -254,8 +282,8 @@ public class LockActivity extends Activity {
 									for (int k=0; k<4; k++) {
 										xx[k] = (byte) (tmpInt & 255);
 										tmpInt >>= 8;
-										fos.write(xx[k]);
 									}
+									fos.write(xx);
 								}
 							}
 							
@@ -271,13 +299,12 @@ public class LockActivity extends Activity {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			
 			this.publishProgress(1);
 
-			this.publishProgress(2);
 			// recognize
 			Log.v("recognize result", "start");
-			score = Recognition.recognition(Config.getRootDir(), Config.getUserName());
+			score = Recognition.Test(Config.getRootDir(), Config.getUserName());
+			test.backupLog(score);
 			Log.v("recognize result", "end");
 			Log.v("recognize result", ""+score);
 			return result + score;
