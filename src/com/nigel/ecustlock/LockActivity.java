@@ -3,11 +3,13 @@ package com.nigel.ecustlock;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
 import java.util.Calendar;
 
 import com.support.Config;
 import com.support.Config.DOTYPE;
+import com.support.GetMfcc;
 import com.support.Recognition;
 import com.support.SRecord;
 import com.support.SRecord.EResultType;
@@ -101,13 +103,7 @@ public class LockActivity extends Activity {
 				channelConfig, audioFormat);
 		audioRecord = new AudioRecord(audioSource, sampleRateInHz,
 				channelConfig, audioFormat, bufferSizeInBytes);
-		if (audioRecord.getState() != AudioRecord.STATE_INITIALIZED) {
-			// TODO audio record initialized failed
-			isRecording = false;
-		} else {
-			audioRecord.startRecording();
-			isRecording = true;
-		}
+
 	}
 
 	@Override
@@ -148,8 +144,17 @@ public class LockActivity extends Activity {
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		boolean isScreenOn = pm.isScreenOn();
 		if (isScreenOn) {
-			AuthenTask ATask = new AuthenTask();
-			ATask.execute();
+			if (audioRecord.getState() != AudioRecord.STATE_INITIALIZED) {
+				// TODO audio record initialized failed
+				isRecording = false;
+			} else {
+				if (isRecording == false) {
+					audioRecord.startRecording();
+					isRecording = true;
+				}
+				AuthenTask ATask = new AuthenTask();
+				ATask.execute();
+			}
 		}
 
 	}
@@ -158,6 +163,13 @@ public class LockActivity extends Activity {
 	protected void onPause() {
 //		Log.i(ac_tag, "onPause");
 		super.onPause();
+		
+//		isRecording = false;
+//		if (audioRecord != null) {
+//			audioRecord.stop();
+//			audioRecord.release();
+//			audioRecord = null;
+//		}
 	}
 	
 	@Override
@@ -199,13 +211,14 @@ public class LockActivity extends Activity {
 			String result = "µÃ·ÖÎª£º";
 			this.publishProgress(0);
 
-			byte[] audioData = new byte[bufferSizeInBytes];
+			short[] audioData = new short[bufferSizeInBytes/2];
 			int readsize = 0;
 			FileOutputStream fos = null;
+			GetMfcc getMfcc = new GetMfcc();
 			try {
-				File file = new File(Config.getRootDir() + Config.getRawPath()
+				File file = new File(Config.getRootDir() + Config.getTestFeaturePath()
 						+ File.separator + Config.getUserName()
-						+ Config.getRawSuf());
+						+ Config.getFeaSuf());
 				if (file.exists()) {
 					file.delete();
 				}
@@ -213,16 +226,40 @@ public class LockActivity extends Activity {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			double[] inSamples = new double[1024];
 			while (isRecording == true) {
-				readsize = audioRecord.read(audioData, 0, bufferSizeInBytes);
+				readsize = audioRecord.read(audioData, 0, bufferSizeInBytes/2);
 
-				if (AudioRecord.ERROR_INVALID_OPERATION != readsize) {
+				if (AudioRecord.ERROR_INVALID_OPERATION != readsize
+						&& AudioRecord.ERROR_BAD_VALUE != readsize) {
 
 					// TODO vad
 					// isRecording = false;
+					for (int i=0; i<readsize; i++){
+						inSamples[i] = audioData[i];
+					}
 
 					try {
-						fos.write(audioData);
+						byte xx[] = new byte[4];
+						double[][] ans = getMfcc.mfcc(inSamples, readsize);
+						if (ans != null) {
+							int height = getMfcc.getFramenum();
+							float tmp = 0;
+							for (int i=0; i<height; i++){
+								for (int j=0; j<getMfcc.getDimension(); j++) {
+									
+									tmp = (float) ans[i+1][j+1];
+									int tmpInt = Float.floatToIntBits(tmp);
+									
+									for (int k=0; k<4; k++) {
+										xx[k] = (byte) (tmpInt & 255);
+										tmpInt >>= 8;
+										fos.write(xx[k]);
+									}
+								}
+							}
+							
+						}
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -236,24 +273,6 @@ public class LockActivity extends Activity {
 			}
 			
 			this.publishProgress(1);
-			// mfcc
-			String iFile = Config.getRootDir() + Config.getRawPath()
-					+ File.separator + Config.getUserName()
-					+ Config.getRawSuf();
-			String oFile;
-			if (Config.getType() == DOTYPE.TRAIN) {
-				oFile = Config.getRootDir() + Config.getFeaturePath()
-						+ File.separator + Config.getUserName()
-						+ Config.getFeaSuf();
-			} else {
-				oFile = Config.getRootDir() + Config.getTestFeaturePath()
-						+ File.separator + Config.getUserName()
-						+ Config.getFeaSuf();
-			}
-
-			Log.v("getMfcc", "start\n" + iFile + "\n" + oFile);
-			Recognition.getMfcc(iFile, oFile);
-			Log.v("getMfcc", "end");
 
 			this.publishProgress(2);
 			// recognize
