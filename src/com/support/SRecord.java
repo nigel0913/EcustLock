@@ -70,7 +70,6 @@ public class SRecord {
 
 		@Override
 		public void run() {
-			// TODO Auto-generated method stub
 			Log.v(tag, "AudioRecordThread start");
 			writeRecord();
 			Log.v(tag, "AudioRecordThread end");

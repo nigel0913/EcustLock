@@ -65,8 +65,10 @@ public class LockActivity extends Activity {
 	int bufferSizeInBytes = 0;
 	boolean isRecording = false;
 	AudioRecord audioRecord = null;
+	AuthenTask ATask = null;
 
-	String ac_tag = "activity life";
+	String ac_tag = "LockActivity life";
+	String async_tag = "AuthenAsyncTask life";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -113,7 +115,7 @@ public class LockActivity extends Activity {
 
 	@Override
 	protected void onStart() {
-//		Log.i(ac_tag, "onStart");
+		Log.i(ac_tag, "onStart");
 		super.onStart();
 	}
 
@@ -143,14 +145,13 @@ public class LockActivity extends Activity {
 		boolean isScreenOn = pm.isScreenOn();
 		if (isScreenOn) {
 			if (audioRecord.getState() != AudioRecord.STATE_INITIALIZED) {
-				// TODO audio record initialized failed
 				isRecording = false;
 			} else {
 				if (isRecording == false) {
 					audioRecord.startRecording();
 					isRecording = true;
 				}
-				AuthenTask ATask = new AuthenTask();
+				ATask = new AuthenTask();
 				ATask.execute();
 			}
 		}
@@ -159,7 +160,7 @@ public class LockActivity extends Activity {
 
 	@Override
 	protected void onPause() {
-//		Log.i(ac_tag, "onPause");
+		Log.i(ac_tag, "onPause");
 		super.onPause();
 		
 //		isRecording = false;
@@ -172,8 +173,31 @@ public class LockActivity extends Activity {
 	
 	@Override
 	protected void onStop() {
-//		Log.i(ac_tag, "onStop");
+		Log.i(ac_tag, "onStop");
+		if (ATask != null) {
+			ATask.cancel(true);
+		}
+		isRecording = false;
+		if (audioRecord != null) {
+			if (audioRecord.getRecordingState() != AudioRecord.RECORDSTATE_RECORDING) {
+				audioRecord.stop();
+			}
+		}
 		super.onStop();
+	}
+	
+	@Override
+	protected void onDestroy() {
+		
+		if (audioRecord != null) {
+			if (audioRecord.getRecordingState() != AudioRecord.RECORDSTATE_RECORDING) {
+				audioRecord.stop();
+			}
+			audioRecord.release();
+			audioRecord = null;
+		}
+		
+		super.onDestroy();
 	}
 
 	@Override
@@ -201,12 +225,14 @@ public class LockActivity extends Activity {
 		@Override
 		protected void onPreExecute() {
 			// 第一个执行方法
+			Log.v(async_tag, "onPreExecute");
 			super.onPreExecute();
 		}
 
 		@Override
 		protected String doInBackground(Void... progress) {
 			String result = "得分为：";
+			Log.v(async_tag, "doInBackground");
 			this.publishProgress(0);
 
 			short[] audioData = new short[bufferSizeInBytes/2];
@@ -294,6 +320,10 @@ public class LockActivity extends Activity {
 				}
 			}
 
+			if (isCancelled()) {
+				return "被取消";
+			}
+			
 			try {
 				fos.close();
 			} catch (IOException e) {
@@ -303,7 +333,7 @@ public class LockActivity extends Activity {
 
 			// recognize
 			Log.v("recognize result", "start");
-			score = Recognition.Test(Config.getRootDir(), Config.getUserName());
+//			score = Recognition.Test(Config.getRootDir(), Config.getUserName());
 			test.backupLog(score);
 			Log.v("recognize result", "end");
 			Log.v("recognize result", ""+score);
@@ -325,6 +355,8 @@ public class LockActivity extends Activity {
 						});
 			}
 			LockActivity.this.progressView.setText(statusString[ progress[0] ]);
+			
+			Log.v(async_tag, "onProgressUpdate");
 			super.onProgressUpdate(progress);
 		}
 
@@ -341,7 +373,15 @@ public class LockActivity extends Activity {
 					});
 			LockActivity.this.progressView.setText(result);
 			
+			Log.v(async_tag, "onPostExecute");
 			super.onPostExecute(result);
+		}
+		
+		@Override
+		protected void onCancelled() {
+			super.onCancelled();
+			// TODO release audio record
+			Log.v(async_tag, "onCancelled");
 		}
 
 	}

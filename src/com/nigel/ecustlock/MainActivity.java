@@ -5,6 +5,7 @@ import com.nigel.service.LockService;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -20,10 +21,14 @@ public class MainActivity extends Activity implements OnClickListener {
 	Button btnOpenTrain = null;
 	Button btnConfig = null;
 	
+	final String life_tag = "life cycle"; 
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+		Log.v(life_tag, "onCreate");
 		
 		this.toggleService = (Switch) super.findViewById(R.id.service_switch);
 		this.btnUserManager = (Button) super.findViewById(R.id.btn_user_manager);
@@ -42,7 +47,43 @@ public class MainActivity extends Activity implements OnClickListener {
 		this.btnOpenTrain.setOnClickListener(this);
 		this.btnConfig.setOnClickListener(this);
 	}
+	
+	@Override
+	protected void onStart() {
+		super.onStart();
+		Log.v(life_tag, "onStart");
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		Log.v(life_tag, "onResume");
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		Log.v(life_tag, "onPause");
+	}
 
+	@Override
+	protected void onStop() {
+		super.onStop();
+		Log.v(life_tag, "onStop");
+	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		Log.v(life_tag, "onDestroy");
+	}
+	
+	@Override
+	protected void onRestart() {
+		super.onRestart();
+		Log.v(life_tag, "onRestart");
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.

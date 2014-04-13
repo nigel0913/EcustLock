@@ -46,7 +46,6 @@ public class PasswordActivity extends Activity {
 
 		@Override
 		public void onClick(View v) {
-			// TODO Auto-generated method stub
 			SharedPreferences sharedPref = getSharedPreferences(getString(R.string.s_settingsPreferences), Context.MODE_PRIVATE);
 			String key = getString(R.string.s_settingsPasswordKey);
 			String pwd = sharedPref.getString(key, "0000");
