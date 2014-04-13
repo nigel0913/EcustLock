@@ -20,6 +20,8 @@
     <string name="str_train">训练</string>
     <string name="str_config">参数设置</string>
     <string name="str_threshold">阈值</string>
+    <string name="str_yes">是</string>
+    <string name="str_no">否</string>
     
 
 </resources>

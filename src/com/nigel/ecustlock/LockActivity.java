@@ -373,6 +373,8 @@ public class LockActivity extends Activity {
 					});
 			LockActivity.this.progressView.setText(result);
 			
+			new ResultDialog().show(getFragmentManager(), result);
+			
 			Log.v(async_tag, "onPostExecute");
 			super.onPostExecute(result);
 		}
