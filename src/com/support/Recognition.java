@@ -7,7 +7,7 @@ public class Recognition {
 	static 
 	{
 		Log.v ("loadLibrary", "start");
-		System.loadLibrary("EcustLock");
+//		System.loadLibrary("EcustLock");
 		Log.v ("loadLibrary", "end");
 	}
 	
@@ -15,10 +15,11 @@ public class Recognition {
 	private native static double jniTest(String rootPath, String filename);
 	
 	public static void TrainGmm(String rootPath, String filename) {
-		jniTrainGmm(rootPath, filename);
+		//jniTrainGmm(rootPath, filename);
 	}
 	public static double Test(String rootPath, String filename) {
-		return jniTest(rootPath, filename);
+//		return jniTest(rootPath, filename);
+		return 0;
 	}
 	
 	

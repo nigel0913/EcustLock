@@ -25,6 +25,7 @@ import android.media.MediaRecorder;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PowerManager;
+import android.support.v4.app.FragmentActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -38,7 +39,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-public class LockActivity extends Activity {
+public class LockActivity extends FragmentActivity {
 
 	TextView timeView = null;
 	TextView dateView = null;
@@ -250,7 +251,7 @@ public class LockActivity extends Activity {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-						
+			
 			// ----------------------
 			SharedPreferences sharedPref = getSharedPreferences(getString(R.string.s_settingsPreferences), Context.MODE_PRIVATE);
 			String key = Config.getLastTrainSetting();
@@ -372,8 +373,7 @@ public class LockActivity extends Activity {
 						}
 					});
 			LockActivity.this.progressView.setText(result);
-			
-			new ResultDialog().show(getFragmentManager(), result);
+			LockActivity.this.showResultDialog();
 			
 			Log.v(async_tag, "onPostExecute");
 			super.onPostExecute(result);
@@ -386,6 +386,12 @@ public class LockActivity extends Activity {
 			Log.v(async_tag, "onCancelled");
 		}
 
+	}
+	
+	public void showResultDialog() {
+		Log.d("dialog", "start");
+		new ResultDialog().show(getSupportFragmentManager(), "result");
+		Log.d("dialog", "end");
 	}
 
 	private void crossfade() {
