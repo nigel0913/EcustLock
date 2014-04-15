@@ -40,6 +40,7 @@ public class LoginActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_login);
+		Log.v(LOG_TAG, "onCreate()");
 		
 		this.btnLogin = (Button) super.findViewById(R.id.btn_login);
 		this.evUsername = (EditText) super.findViewById(R.id.et_username);

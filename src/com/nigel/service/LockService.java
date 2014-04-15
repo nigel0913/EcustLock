@@ -30,7 +30,7 @@ public class LockService extends Service {
 	
 	@Override
 	public void onCreate() {
-		Log.d(LOG_TAG, "onCreate()");
+		Log.v(LOG_TAG, "onCreate()");
 		super.onCreate();
 		registerIntentReceivers();
 		setRunning(true);
@@ -45,7 +45,7 @@ public class LockService extends Service {
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(LOG_TAG, "Received start id " + startId + ": " + intent);
+        Log.v(LOG_TAG, "Received start id " + startId + ": " + intent);
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
 		return START_STICKY;
@@ -54,7 +54,7 @@ public class LockService extends Service {
 	
 	@Override
 	public void onDestroy() {
-		Log.d(LOG_TAG, "onDestroy()");
+		Log.v(LOG_TAG, "onDestroy()");
 		super.onDestroy();
 		setRunning(false);
 		unregisterReceiver(receiverOff);
@@ -76,7 +76,7 @@ public class LockService extends Service {
 	}
 
 	private void registerIntentReceivers() {
-		Log.i(LOG_TAG, "registerIntentReceivers()");
+		Log.v(LOG_TAG, "registerIntentReceivers()");
 		filterOff = new IntentFilter(Intent.ACTION_SCREEN_OFF);
 		receiverOff = new BroadcastReceiver() {
 			public void onReceive(Context context, Intent intent) {

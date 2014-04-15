@@ -16,7 +16,7 @@
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/result_score"
         android:layout_width="match_parent"
         android:layout_height="36dp"
         android:layout_alignParentLeft="true"

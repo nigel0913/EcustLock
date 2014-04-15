@@ -21,7 +21,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	Button btnOpenTrain = null;
 	Button btnConfig = null;
 	
-	final String life_tag = "life cycle"; 
+	final String life_tag = "MainActivity"; 
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

@@ -6,10 +6,15 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.TextView;
 
 public class ResultDialog extends DialogFragment {
 
+	TextView tvScore = null;
+	
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -18,9 +23,13 @@ public class ResultDialog extends DialogFragment {
 
 	    // Inflate and set the layout for the dialog
 	    // Pass null as the parent view because its going in the dialog layout
-	    builder.setView(inflater.inflate(R.layout.dialog_result, null))
+	    final View ResultView = inflater.inflate(R.layout.dialog_result, null);
+	    
+	    builder.setView(ResultView);
+	    tvScore = (TextView) ResultView.findViewById(R.id.result_score);
+	    mListener.onSetScore();
 	    // Add action buttons
-	           .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
+	    builder.setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
 	               @Override
 	               public void onClick(DialogInterface dialog, int id) {
 	                   // sign in the user ...
@@ -39,6 +48,7 @@ public class ResultDialog extends DialogFragment {
 	public interface ResultDialogListener {
 		public void onDialogPositiveClick(DialogFragment dialog);
         public void onDialogNegativeClick(DialogFragment dialog);
+        public void onSetScore();
 	}
 	
 	ResultDialogListener mListener;
@@ -54,6 +64,11 @@ public class ResultDialog extends DialogFragment {
             // The activity doesn't implement the interface, throw exception
             throw new ClassCastException(activity.toString() + " must implement ResultDialogListener");
         }
+	}
+	
+	public void UpdateScoreView(double score) {
+		Log.d("UpdateScoreView", "" + score);
+		tvScore.setText(String.format("µÃ·ÖÎª£º%.2f", score));
 	}
 	
 }

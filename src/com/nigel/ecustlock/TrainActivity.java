@@ -40,11 +40,14 @@ public class TrainActivity extends Activity {
 	boolean isRecording = false;
 	AudioRecord audioRecord = null;
 
+	String ac_tag = "TrainActivity";
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_train);
 
+		Log.v(ac_tag, "onCreate()");
+		
 		this.btnTrain = (Button) super.findViewById(R.id.btn_train);
 		this.tvInfo = (TextView) super.findViewById(R.id.tv_info);
 		
@@ -58,6 +61,7 @@ public class TrainActivity extends Activity {
 
 	@Override
 	protected void onDestroy() {
+		Log.v(ac_tag, "onDestroy()");
 		super.onDestroy();
 	}
 
@@ -89,6 +93,7 @@ public class TrainActivity extends Activity {
 					
 					if (audioRecord.getState() != AudioRecord.STATE_INITIALIZED) {
 						isRecording = false;
+						Log.d("isRecording", ""+isRecording);
 					} 
 					else {
 						btnTrain.setText("Ω· ¯¬º“Ù");
@@ -98,7 +103,7 @@ public class TrainActivity extends Activity {
 						}
 						audioRecord.startRecording();
 						isRecording = true;
-						Log.v("isRecording", ""+isRecording);
+						Log.d("isRecording", ""+isRecording);
 						MfccTask mfccTask = new MfccTask();
 						mfccTask.execute();
 					}

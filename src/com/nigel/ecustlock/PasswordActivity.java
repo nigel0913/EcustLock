@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -23,11 +24,13 @@ public class PasswordActivity extends Activity {
 	private String sPwdNew;
 	private String sPwdComfirm;
 	
-	
+	String ac_tag = "PasswordActivity";
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_user_manager);
+		
+		Log.v(ac_tag, "onCreate()");
 		
 		m_ModifyPwd = (Button) this.findViewById(R.id.btn_UM_modify_pwd);
 		m_ModifyPwd.setOnClickListener(new ModifyOnClickListener());

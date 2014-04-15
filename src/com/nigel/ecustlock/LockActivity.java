@@ -76,7 +76,7 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		Log.i(ac_tag, "onCreate");
+		Log.v(ac_tag, "onCreate");
 		super.onCreate(savedInstanceState);
 		Window win = getWindow();
 		WindowManager.LayoutParams winParams = win.getAttributes();
@@ -119,13 +119,13 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 
 	@Override
 	protected void onStart() {
-		Log.i(ac_tag, "onStart");
+		Log.v(ac_tag, "onStart");
 		super.onStart();
 	}
 
 	@Override
 	protected void onResume() {
-		Log.i(ac_tag, "onResume");
+		Log.v(ac_tag, "onResume");
 		super.onResume();
 
 		Calendar c = Calendar.getInstance();
@@ -144,7 +144,7 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 		this.pbCircle.setVisibility(View.INVISIBLE);
 		this.progressView.setAlpha(1f);
 		this.progressView.setVisibility(View.VISIBLE);
-		this.progressView.setText("进度0");
+		this.progressView.setText("正在初始化...");
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		boolean isScreenOn = pm.isScreenOn();
 		if (isScreenOn) {
@@ -164,20 +164,13 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 
 	@Override
 	protected void onPause() {
-		Log.i(ac_tag, "onPause");
+		Log.v(ac_tag, "onPause");
 		super.onPause();
-		
-//		isRecording = false;
-//		if (audioRecord != null) {
-//			audioRecord.stop();
-//			audioRecord.release();
-//			audioRecord = null;
-//		}
 	}
 	
 	@Override
 	protected void onStop() {
-		Log.i(ac_tag, "onStop");
+		Log.v(ac_tag, "onStop");
 		if (ATask != null) {
 			ATask.cancel(true);
 		}
@@ -235,7 +228,7 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 
 		@Override
 		protected String doInBackground(Void... progress) {
-			String result = "得分为：";
+			String result = "识别结束";
 			Log.v(async_tag, "doInBackground");
 			this.publishProgress(0);
 
@@ -259,7 +252,7 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 			SharedPreferences sharedPref = getSharedPreferences(getString(R.string.s_settingsPreferences), Context.MODE_PRIVATE);
 			String key = Config.getLastTrainSetting();
 			String testRoot = sharedPref.getString(key, "");
-			Log.v("testRoot", testRoot);
+			Log.d("testRoot", testRoot);
 			test = new Test();
 			test.startBackupAuth(testRoot);
 			// ------------------------------------
@@ -336,12 +329,12 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 			this.publishProgress(1);
 
 			// recognize
-			Log.v("recognize result", "start");
-//			score = Recognition.Test(Config.getRootDir(), Config.getUserName());
+			Log.d("recognize result", "start");
+			score = Recognition.Test(Config.getRootDir(), Config.getUserName());
 			test.backupLog(score);
-			Log.v("recognize result", "end");
-			Log.v("recognize result", ""+score);
-			return result + score;
+			Log.d("recognize result", "end");
+			Log.d("recognize result", ""+score);
+			return result;
 		}
 
 		@Override
@@ -460,6 +453,14 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 	public void onDialogNegativeClick(DialogFragment dialog) {
 		Toast.makeText(getApplicationContext(), "识别错误", Toast.LENGTH_SHORT).show();
 		LockActivity.this.finish();
+	}
+
+	@Override
+	public void onSetScore() {
+		ResultDialog dialog = (ResultDialog) getSupportFragmentManager().findFragmentByTag("result");
+		if (dialog != null) {
+			dialog.UpdateScoreView(score);
+		}
 	}
 
 }
