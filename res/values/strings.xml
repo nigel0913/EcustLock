@@ -22,6 +22,7 @@
     <string name="str_threshold">阈值</string>
     <string name="str_yes">是</string>
     <string name="str_no">否</string>
+    <string name="save">保存</string>
     
 
 </resources>
