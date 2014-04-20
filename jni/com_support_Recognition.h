@@ -10,18 +10,18 @@ extern "C" {
 /*
  * Class:     com_support_Recognition
  * Method:    jniTrainGmm
- * Signature: (Ljava/lang/String;Ljava/lang/String;)V
+ * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
  */
 JNIEXPORT void JNICALL Java_com_support_Recognition_jniTrainGmm
-  (JNIEnv *, jclass, jstring, jstring);
+  (JNIEnv *, jclass, jstring, jstring, jstring, jstring);
 
 /*
  * Class:     com_support_Recognition
  * Method:    jniTest
- * Signature: (Ljava/lang/String;Ljava/lang/String;)D
+ * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)D
  */
 JNIEXPORT jdouble JNICALL Java_com_support_Recognition_jniTest
-  (JNIEnv *, jclass, jstring, jstring);
+  (JNIEnv *, jclass, jstring, jstring, jstring, jstring);
 
 #ifdef __cplusplus
 }

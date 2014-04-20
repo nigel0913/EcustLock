@@ -14,6 +14,8 @@ import android.widget.TextView;
 public class ResultDialog extends DialogFragment {
 
 	TextView tvScore = null;
+	TextView tvThreshold = null;
+	TextView tvName = null;
 	
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -27,6 +29,8 @@ public class ResultDialog extends DialogFragment {
 	    
 	    builder.setView(ResultView);
 	    tvScore = (TextView) ResultView.findViewById(R.id.result_score);
+	    tvThreshold = (TextView) ResultView.findViewById(R.id.result_threshold);
+	    tvName = (TextView) ResultView.findViewById(R.id.result_name);
 	    mListener.onSetScore();
 	    // Add action buttons
 	    builder.setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
@@ -66,9 +70,11 @@ public class ResultDialog extends DialogFragment {
         }
 	}
 	
-	public void UpdateScoreView(double score) {
+	public void UpdateScoreView(double score, double threshold, String trainer) {
 		Log.d("UpdateScoreView", "" + score);
 		tvScore.setText(String.format("得分为：%.2f", score));
+		tvThreshold.setText(String.format("阈值为：%.2f", threshold));
+		tvName.setText("你是"+trainer+"吗？");
 	}
 	
 }

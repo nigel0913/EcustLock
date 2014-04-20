@@ -1,27 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/RelativeLayout1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" 
+    android:orientation="vertical"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin" >
+
+    <TextView
+        android:id="@+id/tv_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/tv_info"
+        android:layout_alignParentTop="true"
+        android:text="上次训练者为" />
     
+    <EditText
+        android:id="@+id/et_new_trainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/tv_description"
+        android:ems="10"
+        android:focusable="false"
+        android:hint="请输入新训练者"
+        android:inputType="textPersonName" >
+
+    </EditText>
     
-    <Button 
+    <Button
         android:id="@+id/btn_train"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/str_train"/>
-    
-    <TextView 
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/et_new_trainer"
+        android:text="@string/str_train" />
+
+    <TextView
         android:id="@+id/tv_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/btn_train"
         android:scrollbars="vertical"
         android:singleLine="false"
-        android:text="@string/str_train"/>
-    
+        android:text="@string/str_train" />
 
-</LinearLayout>
+    <Button
+        android:id="@+id/btn_test"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/tv_info"
+        android:text="GetMfcc" />
+
+</RelativeLayout>

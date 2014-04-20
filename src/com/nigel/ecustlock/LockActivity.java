@@ -7,7 +7,7 @@ import java.text.DecimalFormat;
 import java.util.Calendar;
 
 import com.nigel.ecustlock.ResultDialog.ResultDialogListener;
-import com.support.Config;
+import com.support.Cfg;
 import com.support.GetMfcc;
 import com.support.Recognition;
 import com.support.Test;
@@ -234,28 +234,12 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 
 			short[] audioData = new short[bufferSizeInBytes/2];
 			int readsize = 0;
-			FileOutputStream fos = null;
 			GetMfcc getMfcc = new GetMfcc();
-			try {
-				File file = new File(Config.getRootDir() + Config.getTestFeaturePath()
-						+ File.separator + Config.getUserName()
-						+ Config.getFeaSuf());
-				if (file.exists()) {
-					file.delete();
-				}
-				fos = new FileOutputStream(file);
-			} catch (Exception e) {
-				e.printStackTrace();
+			File file = new File(Cfg.getRootDir() + Cfg.getTmpPath()
+					+ File.separator + Cfg.getUserName() + Cfg.getFeaSuf());
+			if (file.exists()) {
+				file.delete();
 			}
-			
-			// ----------------------
-			SharedPreferences sharedPref = getSharedPreferences(getString(R.string.s_settingsPreferences), Context.MODE_PRIVATE);
-			String key = Config.getLastTrainSetting();
-			String testRoot = sharedPref.getString(key, "");
-			Log.d("testRoot", testRoot);
-			test = new Test();
-			test.startBackupAuth(testRoot);
-			// ------------------------------------
 			
 			double[] inSamples = new double[1024];
 			while (isRecording == true) {
@@ -264,56 +248,11 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 				if (AudioRecord.ERROR_INVALID_OPERATION != readsize
 						&& AudioRecord.ERROR_BAD_VALUE != readsize) {
 
-					// TODO vad
-					// isRecording = false;
-					test.backupShortData(
-							test.getAuthDirPath() + File.separator + Config.getUserName()+".short",
-							audioData, 
-							readsize);
 					for (int i=0; i<readsize; i++){
 						inSamples[i] = audioData[i];
 					}
 
-					try {
-						byte xx[] = new byte[4];
-						double[][] ans = getMfcc.mfcc(inSamples, readsize);
-						
-						if (ans != null) {
-							
-							int height = getMfcc.getFramenum();
-							int width = getMfcc.getDimension();
-							float tmp = 0;
-							
-							// next is used for backup mfcc
-							float[] backupData = new float[width];
-							for (int i=0; i<height; i++) {
-								for (int j=0; j<width; j++) {
-									backupData[j] = (float) ans[i+1][j+1];
-								}
-								test.backupFloatData(
-										test.getAuthDirPath() + File.separator + Config.getUserName()+".mfcc",
-										backupData,
-										width);
-							}
-								
-							for (int i=0; i<height; i++){
-								for (int j=0; j<width; j++) {
-									
-									tmp = (float) ans[i+1][j+1];
-									int tmpInt = Float.floatToIntBits(tmp);
-									
-									for (int k=0; k<4; k++) {
-										xx[k] = (byte) (tmpInt & 255);
-										tmpInt >>= 8;
-									}
-									fos.write(xx);
-								}
-							}
-							
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+					getMfcc.writemfcc(file, inSamples, readsize);
 				}
 			}
 
@@ -321,16 +260,11 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 				return "±»È¡Ïû";
 			}
 			
-			try {
-				fos.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 			this.publishProgress(1);
 
 			// recognize
 			Log.d("recognize result", "start");
-			score = Recognition.Test(Config.getRootDir(), Config.getUserName());
+//			score = Recognition.Test(Cfg.getRootDir(), Cfg.getUserName());
 			test.backupLog(score);
 			Log.d("recognize result", "end");
 			Log.d("recognize result", ""+score);
@@ -459,7 +393,10 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 	public void onSetScore() {
 		ResultDialog dialog = (ResultDialog) getSupportFragmentManager().findFragmentByTag("result");
 		if (dialog != null) {
-			dialog.UpdateScoreView(score);
+			SharedPreferences sharedPref = getSharedPreferences(getString(R.string.s_settingsPreferences), Context.MODE_PRIVATE);
+			String key = getString(R.string.s_settingsThreshold);
+			float threshold = sharedPref.getFloat(key, -50);
+			dialog.UpdateScoreView(score, threshold, "xxx");
 		}
 	}
 
