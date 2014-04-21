@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import com.support.Config;
+import com.support.Cfg;
 
 import android.app.Activity;
 import android.content.Context;
@@ -67,7 +67,7 @@ public class LoginActivity extends Activity {
 				this.innovationSaveFileDir.mkdirs();
 			}
 			
-			Config.setRootDir(rootDir);
+			Cfg.setRootDir(rootDir);
 			InitFiles();
 		}
 	}
@@ -102,16 +102,16 @@ public class LoginActivity extends Activity {
 	 */
 	private void InitFiles() {
 		File fDir = null;
-		for (String dirName : Config.getDirLists()) {
-			fDir = new File(Config.getRootDir() + File.separator + dirName + File.separator);
+		for (String dirName : Cfg.getDirLists()) {
+			fDir = new File(Cfg.getRootDir() + File.separator + dirName + File.separator);
 			if ( !fDir.exists() ) {
 				fDir.mkdirs();
 			}
 		}
 		
-		File worldModel = new File(Config.getRootDir() + File.separator + Config.getWorldModelPath() + File.separator + Config.getWorldModelFile());
+		File worldModel = new File(Cfg.getRootDir() + File.separator + Cfg.getWorldMdlPath() + File.separator + Cfg.getWorldMdlFile());
 		if ( !worldModel.exists() ) {
-			copyAssets(Config.getWorldModelFile(), Config.getRootDir() + File.separator + Config.getWorldModelPath());
+			copyAssets(Cfg.getWorldMdlFile(), Cfg.getRootDir() + File.separator + Cfg.getWorldMdlPath());
 		}
 	}
 	

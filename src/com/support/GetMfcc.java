@@ -1,21 +1,33 @@
 package com.support;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import android.util.Log;
+
 
 public class GetMfcc {
 
-	private double fs = 44100;
+	private double fs = 8000;
 	private int bankL = 0;
 	private int bankW = 0;	//bank矩阵bankW * bankL
 	private int framenum;
 	private int framelen = 256;
-	private double[] buffer = new double[framelen * 3];
+	private double[] buffer = new double[framelen * 4];
 	private int bufferSize = 0;
 	private double[] data;
 	private int dim = 26;
 	private int p = 24;
-
+	private FileOutputStream fos = null;
+	private DataOutputStream dos = null;
+	
+	int line = 0;
+	int samples = 0;
+	
 	public GetMfcc()
 	{
-		
 	}
 	
 	public GetMfcc(int dim)
@@ -37,7 +49,7 @@ public class GetMfcc {
 	}
 
 	
-	public double frq2mel(double frq)
+	private double frq2mel(double frq)
 	{
 		double k = 1127.01048;
 		double af = Math.abs(frq);
@@ -45,7 +57,7 @@ public class GetMfcc {
 		return mel;
 	}
 
-	public double mel2frq(double mel)
+	private double mel2frq(double mel)
 	{
 		double k = 1127.01048;
 		double frq = 700 * Math.signum(mel) * (Math.exp(Math.abs(mel) / k) - 1);
@@ -147,8 +159,9 @@ public class GetMfcc {
 			for(int i = 1; i <= cnt; i++)
 				c[i] = Math.abs(c[i] + b1 - 1) - b1 + 1;
 
-		for(int i = 1; i <= cnt; i++)
+		for(int i = 1; i <= cnt; i++){
 			v[i] = 0.5 - 0.46 / 1.08 * Math.cos(v[i] * Math.PI);
+		}
 
 		for(int i = 1; i <= cnt; i++)
 		{
@@ -166,18 +179,23 @@ public class GetMfcc {
 		for(int i = 1; i <= cnt; i++)
 			if(v[i] > Max)
 				Max = v[i];
+		Log.d("Max", ""+Max);
 		for(int i = 1; i <= cnt; i++)
 			bank[r[i]][c[i] + mn - 1] = v[i] / Max;
 		
 		bankL = fn2 + 1;
 		bankW = p;		
+		for (int i = 1; i <= p; i++)
+			for (int j = 1; j <= 1 + fn2; j++)
+				if (bank[i][j] < 0)
+					Log.e("bank < 0", "i="+i+",j="+j+",bank[i][j]="+bank[i][j]);
 		return bank;
 	}
 	
 	/*
 	 * 汉明窗
 	 */
-	public double[] hamming(int framelen)
+	private double[] hamming(int framelen)
 	{
 		double[] win = new double[framelen + 1];
 		for(int i = 0; i < framelen; i++)
@@ -186,9 +204,9 @@ public class GetMfcc {
 	}
 	
 	/*
-	 * 分帧，加hamming窗
+	 * 分帧
 	 */
-	public double[][] enframe(double[] data, int framelen)
+	private double[][] enframe(double[] data, int framelen)
 	{
 		int datalen = data.length;
 		int inc = framelen / 2;
@@ -217,7 +235,7 @@ public class GetMfcc {
 	/*
 	 * 快速傅里叶变换
 	 */
-	public double[] fft(double[] vector, int framelen)
+	private double[] fft(double[] vector, int framelen)
 	{   
 	    //输出为dataR存放实数，dataI存放虚数，dataM存放功率谱   
 	    double[] dataR = new double[framelen+1];
@@ -286,7 +304,9 @@ public class GetMfcc {
 	   
 	    for(i = 0; i < framelen; i++)   
 	    {      
-	        vector[i] = dataR[i] * dataR[i] + dataI[i] * dataI[i];       
+	        vector[i] = dataR[i] * dataR[i] + dataI[i] * dataI[i];    
+	        if (vector[i] < 0)
+	        	Log.e("vector[i] < 0", "i="+i);
 	    }
 	    return vector;
 	}
@@ -294,7 +314,6 @@ public class GetMfcc {
 	/*
 	 * p滤波器数目
 	 * dim为要提取特征的维数
-	 * 下标从1开始
 	 */
 	
 	public double[][] mfcc(double[] idata, int ilen)
@@ -302,31 +321,55 @@ public class GetMfcc {
 		/*
 		 * 缓冲 前2.5*framelen个数据
 		 */
-		int len;
-		if(bufferSize >= (int)(2.5 * framelen))
-			len = (int)(2.5 * framelen);
-		else
-			len = bufferSize;
+		final int halfframe = framelen / 2;
+		samples += ilen;
 		
-		data = new double[ilen + len];
+		int len = bufferSize;
+		int dataLength = ( ilen + len ) / halfframe * halfframe;
+		int deltaLen = (ilen + len) - dataLength;
+		
+		Log.d("mfcc", "samples="+samples+",buffer="+bufferSize+",dataLength="+dataLength+",delta="+deltaLen);
+		data = new double[dataLength];
 		for(int i = 0; i < len; i++)
 			data[i] = buffer[i];
 			
 		for(int i = len; i < data.length; i++)
 			data[i] = idata[i - len];
 
-		if(data.length >= (int)(2.5 * framelen))
-		{
-			bufferSize = (int)(2.5 * framelen);
-			for(int i = data.length - bufferSize; i < data.length; i++)
-				buffer[i - data.length + bufferSize] = data[i];
-		}
-		else
-		{
-			bufferSize = data.length;
-			for(int i = 0; i < bufferSize; i++)
+		if (data.length < 6 * halfframe) {
+			bufferSize = data.length + deltaLen;
+			for (int i=0; i < data.length ; i++) {
 				buffer[i] = data[i];
+			}
+			for (int i=0; i < deltaLen; i++) {
+				buffer[i+data.length] = idata[ilen - deltaLen + i];
+			}
 		}
+		else {
+			bufferSize = 5 * halfframe + deltaLen;
+			for (int i=0; i < 5*halfframe; i++) {
+				buffer[i] = data[ data.length - 5*halfframe + i ];
+			}
+			for (int i=0; i < deltaLen; i++) {
+				buffer[5*halfframe + i] = idata[ilen - deltaLen + i];
+			}
+		}
+		
+//		if(data.length >= 4 * halfframe)
+//		{
+//			bufferSize = 4 * halfframe + data.length % halfframe;
+//			for(int i = data.length - bufferSize; i < data.length; i++)
+//				buffer[i - data.length + bufferSize] = data[i];
+//		}
+//		else
+//		{
+//			bufferSize = data.length;
+//			for(int i = 0; i < bufferSize; i++)
+//				buffer[i] = data[i];
+//			
+//			return null;
+//		}
+		Log.d("bufferSize", ""+bufferSize + " " + data.length + " " + deltaLen);
 		
 		double[][] bank = melbank(p, framelen);
 		double[][] dct = new double[dim/2+1][p+1];
@@ -339,7 +382,7 @@ public class GetMfcc {
 		double Max = -1e30;
 		for(int i = 1; i <= dim/2; i++)
 		{
-			w[i] = 1 + 6 * Math.sin(Math.PI * i / 16);
+			w[i] = 1 + 6 * Math.sin(Math.PI * i / (dim / 2));
 			Max = Math.max(Max, w[i]);
 		}
 		
@@ -375,8 +418,14 @@ public class GetMfcc {
 			
 			for(int j = 1; j <= p; j++)
 			{
-				for(int k = 1; k <= bankL; k++)
+				for(int k = 1; k <= bankL; k++) {
 					tmp[j] += vector[k] * bank[j][k];
+					if (vector[k] * bank[j][k] < 0) {
+						Log.e("vector[k] * bank[j][k] < 0", ""+(vector[k] * bank[j][k]) );
+					}
+				}
+				if (tmp[j] < 0) 
+					Log.e("tm[j]", "< 0");
 				tmp[j] = Math.log(tmp[j]);
 			}
 			
@@ -413,6 +462,50 @@ public class GetMfcc {
 	public double[][] mfcc(double[] idata)
 	{
 		return mfcc(idata, idata.length);
+	}
+	
+	public void writemfcc(File file, double[] idata, int ilen)
+	{
+		double[][] mfcc = mfcc(idata, ilen);
+		if(mfcc == null)	return;
+		
+		try {
+			fos = new FileOutputStream(file, true);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		dos = new DataOutputStream(fos);
+		byte xx[] = new byte[4];
+		
+		for(int i = 1; i <= getFramenum(); i++){
+			this.line++;
+			Log.d("this.line", ""+this.line);
+			for(int j = 1; j <= dim; j++)
+			{
+				float tmp = (float) mfcc[i][j];
+//				Log.v(String.valueOf(j), String.valueOf(tmp));
+				int y = Float.floatToIntBits(tmp);
+				for (int k = 0; k < 4; k++)
+				{
+					xx[k] = (byte) (y & 255);
+					y = y >> 8;
+					try {
+						dos.write(xx[k]);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		try {
+			dos.close();
+			fos.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public int getFramenum()

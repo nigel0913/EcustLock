@@ -1,13 +1,15 @@
 package com.nigel.ecustlock;
 
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import com.support.Config;
+import com.support.Cfg;
 import com.support.GetMfcc;
 import com.support.Recognition;
 import com.support.Test;
@@ -21,15 +23,18 @@ import android.media.MediaRecorder;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class TrainActivity extends Activity {
 
 	Button btnTrain = null;
+	Button btnTest = null;
 	TextView tvInfo = null;
 	
 	int audioSource = MediaRecorder.AudioSource.MIC;
@@ -39,6 +44,8 @@ public class TrainActivity extends Activity {
 	int bufferSizeInBytes = 0;
 	boolean isRecording = false;
 	AudioRecord audioRecord = null;
+	
+	MfccTask mfccTask = null;
 
 	String ac_tag = "TrainActivity";
 	@Override
@@ -50,8 +57,10 @@ public class TrainActivity extends Activity {
 		
 		this.btnTrain = (Button) super.findViewById(R.id.btn_train);
 		this.tvInfo = (TextView) super.findViewById(R.id.tv_info);
+		this.btnTest = (Button) super.findViewById(R.id.btn_test);
 		
 		this.btnTrain.setOnClickListener(new TrainOnClickListenserImpl());
+		this.btnTest.setOnClickListener(new TrainOnClickListenserImpl());
 		
 		bufferSizeInBytes = AudioRecord.getMinBufferSize(sampleRateInHz,
 				channelConfig, audioFormat);
@@ -72,43 +81,121 @@ public class TrainActivity extends Activity {
 		return true;
 	}
 
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+//		Log.i(ac_tag, "");
+		switch (keyCode) {
+		case KeyEvent.KEYCODE_BACK:
+			isRecording = false;
+			if (audioRecord != null) {
+				audioRecord.stop();
+				audioRecord.release();
+				audioRecord = null;
+			}
+			
+			if (mfccTask != null) {
+				mfccTask.cancel(true);
+			}
+			
+			return super.onKeyDown(keyCode, event);
+		case KeyEvent.KEYCODE_MENU:
+			isRecording = false;
+//			crossfade();
+			return super.onKeyDown(keyCode, event);
+		}
+		return super.onKeyDown(keyCode, event);
+	}
+	
 	private class TrainOnClickListenserImpl implements OnClickListener {
 
 		@Override
 		public void onClick(View v) {
 			int id = v.getId();
-			if (id == R.id.btn_train) {
-				if (isRecording == true) {
-					btnTrain.setText("开始录音");
-
-					isRecording = false;
-					if (audioRecord != null) {
-						Log.v("release","release");
-						audioRecord.stop();
-						audioRecord.release();
-						audioRecord = null;
-					}
-
-				} else {
-					
-					if (audioRecord.getState() != AudioRecord.STATE_INITIALIZED) {
+			switch (id) {
+				case R.id.btn_train:
+					if (isRecording == true) {
+						btnTrain.setText("开始录音");
+	
 						isRecording = false;
-						Log.d("isRecording", ""+isRecording);
-					} 
-					else {
-						btnTrain.setText("结束录音");
-						if (audioRecord == null) {
-							audioRecord = new AudioRecord(audioSource, sampleRateInHz,
-									channelConfig, audioFormat, bufferSizeInBytes);
+						if (audioRecord != null) {
+							Log.v("release","release");
+							audioRecord.stop();
+							audioRecord.release();
+							audioRecord = null;
 						}
-						audioRecord.startRecording();
-						isRecording = true;
-						Log.d("isRecording", ""+isRecording);
-						MfccTask mfccTask = new MfccTask();
-						mfccTask.execute();
+	
+					} else {
+						
+						if (audioRecord.getState() != AudioRecord.STATE_INITIALIZED) {
+							isRecording = false;
+							Log.d("isRecording", ""+isRecording);
+						} 
+						else {
+							btnTrain.setText("结束录音");
+							if (audioRecord == null) {
+								audioRecord = new AudioRecord(audioSource, sampleRateInHz,
+										channelConfig, audioFormat, bufferSizeInBytes);
+							}
+							audioRecord.startRecording();
+							isRecording = true;
+							Log.d("isRecording", ""+isRecording);
+							mfccTask = new MfccTask();
+							mfccTask.execute();
+						}
 					}
-				}
+					break;
+				
+				case R.id.btn_test:
+					
+					int[] Len = {320, 384, 512, 1024};
+					File[] cmp = new File[4];
+					File txt = new File(Cfg.getRootDir() + Cfg.getTmpPath() 
+							+ File.separator + Cfg.getUserName() + ".txt");
+					for (int i=0; i<Len.length; i++) {
+						String filename = Cfg.getRootDir() + Cfg.getTmpPath() + 
+								File.separator + Cfg.getUserName() + Cfg.getFeaSuf() +Len[i];
+						System.out.println(filename);
+						cmp[i] = new File(filename);
+						if (cmp[i].exists()) {
+							cmp[i].delete();
+						}
+					}
+					for (int i=0; i<Len.length; i++) {
+						try {
+							GetMfcc getMfcc = new GetMfcc();
+							BufferedReader buffer = new BufferedReader(new FileReader(txt));
+							
+							int tLen = Len[i];
+							String line = null;
+							double[] idata = new double[1024];
+							int j = 0;
+							while ( (line = buffer.readLine()) != null ) {
+								double tmp = (double) Integer.parseInt(line);
+								idata[j] = tmp;
+								if (j == tLen-1) {
+									j = 0;
+									getMfcc.writemfcc(cmp[i], idata, tLen);
+								}
+								else {
+									j++;
+								}
+							}
+							if (j > 0) {
+								getMfcc.writemfcc(cmp[i], idata, j);
+							}
+							
+							buffer.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+						Log.d("mfcc.cmp", ""+Len[i]);
+					}
+					
+					TrainActivity.this.tvInfo.setText("GetMfcc");
+					
+					break;
 			}
+			
 		}
 
 	}
@@ -119,134 +206,77 @@ public class TrainActivity extends Activity {
 		protected String doInBackground(Void... progress) {
 			this.publishProgress("正在录音...");
 			
-			short[] audioData = new short[bufferSizeInBytes/2];
+			short[] audioData = new short[bufferSizeInBytes];
+			double[] inSamples = new double[bufferSizeInBytes];
 			int readsize = 0;
-			FileOutputStream fos = null;
-			FileOutputStream fos_bak = null;
-			DataOutputStream dos_bak = null;
+			
 			PrintWriter writer = null;
-			GetMfcc getMfcc = new GetMfcc();
-			
-			//--------------------------------
-			Test test = new Test();
-			test.startBackupTrain(Config.getRootDir() + Config.getRawPath());
-			SharedPreferences sharedPref = getSharedPreferences(getString(R.string.s_settingsPreferences), Context.MODE_PRIVATE);
-			String key = Config.getLastTrainSetting();
-			SharedPreferences.Editor editor = sharedPref.edit();
-			editor.putString(key, test.getTrainDirPath());
-			editor.commit();
-			//------------------------------------
-			
 			try {
-				File file = new File(Config.getRootDir() + Config.getFeaturePath()
-						+ File.separator + Config.getUserName()
-						+ Config.getFeaSuf());
-				if (file.exists()) {
-					file.delete();
+				File txt = new File(Cfg.getRootDir() + Cfg.getTmpPath() 
+						+ File.separator + Cfg.getUserName() + ".txt");
+				if (txt.exists()) {
+					txt.delete();
 				}
-				fos = new FileOutputStream(file);
-				
-				File file_bak = new File(Config.getRootDir()+Config.getFeaturePath()
-						+ File.separator + Config.getUserName() + ".data");
-				if (file_bak.exists())
-					file_bak.delete();
-				
-				File file_txt = new File(Config.getRootDir()+Config.getFeaturePath()
-						+ File.separator + Config.getUserName() + ".txt");
-				if (file_txt.exists())
-					file_txt.delete();
-				fos_bak = new FileOutputStream(file_bak);
-				dos_bak = new DataOutputStream(fos_bak);
-				writer = new PrintWriter(file_txt);
+				writer = new PrintWriter(txt);
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
+			GetMfcc getMfcc = new GetMfcc();
 			
-			double[] inSamples = new double[1024];
-			int v = -100;
+			File fileMfcc = new File(Cfg.getRootDir() + Cfg.getTmpPath() + 
+					File.separator + Cfg.getUserName() + Cfg.getFeaSuf());
+			if (fileMfcc.exists()) {
+				fileMfcc.delete();
+			}
+			
 			while (isRecording == true) {
-				readsize = audioRecord.read(audioData, 0, bufferSizeInBytes/2);
+				readsize = audioRecord.read(audioData, 0, bufferSizeInBytes);
+				Log.d("readsize", ""+readsize);
 				if (AudioRecord.ERROR_INVALID_OPERATION != readsize
 						&& AudioRecord.ERROR_BAD_VALUE != readsize) {
 
-					test.backupShortData(
-							test.getTrainDirPath() + File.separator + Config.getUserName()+".short",
-							audioData, 
-							readsize);
 					for (int i=0; i<readsize; i++){
 						inSamples[i] = audioData[i];
+						
+						writer.println(""+audioData[i]);
 					}
 
-					try {
-						byte xx[] = new byte[4];
-						double[][] ans = getMfcc.mfcc(inSamples, readsize);
-						if (ans != null) {
-							int height = getMfcc.getFramenum();
-							int width = getMfcc.getDimension();
-							
-							// next is used for backup mfcc
-							float[] backupData = new float[width];
-							for (int i=0; i<height; i++) {
-								for (int j=0; j<width; j++) {
-									backupData[j] = (float) ans[i+1][j+1];
-								}
-								test.backupFloatData(
-										test.getTrainDirPath() + File.separator + Config.getUserName()+".mfcc",
-										backupData,
-										width);
-							}
-							
-							float tmp = 0;
-							for (int i=0; i<height; i++){
-								for (int j=0; j<width; j++) {
-									
-									tmp = (float) ans[i+1][j+1];
-									dos_bak.writeFloat(tmp);
-									writer.println(tmp);
-									int tmpInt = Float.floatToIntBits(tmp);
-									
-									for (int k=0; k<4; k++) {
-										xx[k] = (byte) (tmpInt & 255);
-										tmpInt >>= 8;
-										fos.write(xx[k]);
-									}
-								}
-							}
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+					getMfcc.writemfcc(fileMfcc, inSamples, readsize);
 				}
 			}
 			
-			try {
-				fos.close();
-				dos_bak.close();
-				writer.close();
-			} catch (IOException e) {
-				e.printStackTrace();
+			writer.close();
+			
+			if (isCancelled()) {
+				return "被取消";
 			}
 			
 			
 			this.publishProgress("正在训练模型...");
-			Recognition.TrainGmm(Config.getRootDir(), Config.getUserName());
+			Recognition.TrainGmm(Cfg.getRootDir() + Cfg.getWorldMdlPath() + File.separator,
+					Cfg.getRootDir() + Cfg.getTmpPath() + File.separator,
+					Cfg.getRootDir() + Cfg.getTmpPath() + File.separator,
+					Cfg.getUserName());
 			
 			return "训练完成";
 		}
 		
 		@Override
 		protected void onProgressUpdate(String... values) {
-			
+			if (values[0].equals("正在录音..."))
+				TrainActivity.this.btnTest.setEnabled(false);
+			if (values[0].equals("正在训练模型...")) {
+				TrainActivity.this.btnTrain.setEnabled(false);
+				TrainActivity.this.btnTest.setEnabled(true);
+			}
 			TrainActivity.this.tvInfo.setText(values[0]);
-			
 			super.onProgressUpdate(values);
 		}
 		
 		@Override
 		protected void onPostExecute(String result) {
-			
+			TrainActivity.this.btnTrain.setEnabled(true);
 			TrainActivity.this.tvInfo.setText(result);
-			
 			super.onPostExecute(result);
 		}
 		
