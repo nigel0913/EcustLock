@@ -22,23 +22,27 @@ public class GetMfcc {
 	private int p = 24;
 	private FileOutputStream fos = null;
 	private DataOutputStream dos = null;
+	double[][] bank = new double[p+1][framelen];
 	
 	int line = 0;
 	int samples = 0;
 	
 	public GetMfcc()
 	{
+		bank = melbank(p, framelen);
 	}
 	
 	public GetMfcc(int dim)
 	{
 		this.dim = dim;
+		bank = melbank(p, framelen);
 	}
 	
 	public GetMfcc(double fs, int dim)
 	{
 		this.fs = fs;
 		this.dim = dim;
+		bank = melbank(p, framelen);
 	}
 	
 	public GetMfcc(double fs, int dim, int p)
@@ -46,6 +50,7 @@ public class GetMfcc {
 		this.dim = dim;
 		this.fs = fs;
 		this.p = p;
+		bank = melbank(p, framelen);
 	}
 
 	
@@ -149,10 +154,15 @@ public class GetMfcc {
 		
 		double[] v = new double[N];
 		cnt = 0;
-		for(int i = 1; i <= k3; i++)
+		Log.d("k2,k3,k4,cnt", ""+k2+","+k3+","+k4);
+		for(int i = 1; i <= k3; i++){
 			v[++cnt] = pm[i];
-		for(int i = k2; i <= k4; i++)
+			Log.d("v[++cnt]", "cnt="+cnt+",v[cnt]="+v[cnt]+",i="+i+",pm[i]="+pm[i]);
+		}
+		for(int i = k2; i <= k4; i++){
 			v[++cnt] = 1 - pm[i];
+			Log.d("v[++cnt]", "cnt="+cnt+",v[cnt]="+v[cnt]+",i="+i+",1-pm[i]="+(1-pm[i]) );
+		}
 		int mn = b1 + 1;
 
 		if(b1 < 0)
@@ -161,13 +171,19 @@ public class GetMfcc {
 
 		for(int i = 1; i <= cnt; i++){
 			v[i] = 0.5 - 0.46 / 1.08 * Math.cos(v[i] * Math.PI);
+//			if (v[i] < 0)
+//				Log.e("v[i]", "i="+i+",v[i]="+v[i]);
 		}
 
 		for(int i = 1; i <= cnt; i++)
 		{
 			if(c[i] + mn > 2 && (c[i] + mn < n - fn2 + 2))
 				v[i] = 2 * v[i];
+//			if (v[i] < 0)
+//				Log.e("v[i]*2", "i="+i+",v[i]="+v[i]);
 		}
+		for (int i = 1; i <= cnt; i++)
+			Log.d("v[i]", "i="+i+",v[i]="+v[i]);
 
 		double[][] bank = new double[p+1][N];
 		
@@ -180,6 +196,7 @@ public class GetMfcc {
 			if(v[i] > Max)
 				Max = v[i];
 		Log.d("Max", ""+Max);
+		
 		for(int i = 1; i <= cnt; i++)
 			bank[r[i]][c[i] + mn - 1] = v[i] / Max;
 		
@@ -371,7 +388,7 @@ public class GetMfcc {
 //		}
 		Log.d("bufferSize", ""+bufferSize + " " + data.length + " " + deltaLen);
 		
-		double[][] bank = melbank(p, framelen);
+//		bank = melbank(p, framelen);
 		double[][] dct = new double[dim/2+1][p+1];
 		double[] w= new double[dim/2+1]; 
 		
