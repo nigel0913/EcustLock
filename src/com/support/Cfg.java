@@ -10,9 +10,16 @@ public class Cfg {
 	static String adminPath = "admin";
 	
 	static String worldMdlFile = "WorldModel.mdl";
-	static String userName = "1";
+	static String userName = "admin";
 	static String feaSuf = ".mfcc";
+	static String mdlSuf = ".mdl";
 	
+	public static String getMdlSuf() {
+		return mdlSuf;
+	}
+	public static void setMdlSuf(String mdlSuf) {
+		Cfg.mdlSuf = mdlSuf;
+	}
 	public static String getTmpPath() {
 		return tmpPath;
 	}

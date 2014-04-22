@@ -41,7 +41,7 @@
         android:textSize="16sp" />
 
     <TextView
-        android:id="@+id/result_name"
+        android:id="@+id/result_trainer"
         android:layout_width="match_parent"
         android:layout_height="36dp"
         android:layout_alignParentLeft="true"

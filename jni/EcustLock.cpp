@@ -101,7 +101,7 @@ JNIEXPORT jdouble JNICALL Java_com_support_Recognition_jniTest(JNIEnv * env, jcl
 	config.setParam("maxLLK", "100");
 	config.setParam("distribType", "GD");
 
-	return test(config, feaPath, worldPath, mdlPath, filename);
+	return test(config, worldPath, feaPath, mdlPath, filename);
 }
 
 void trainGMM(Config config, char* worldPath, char* featurePath, char* modelPath, char* filename)

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import com.support.Cfg;
+import com.support.FileAccess;
 import com.support.GetMfcc;
 import com.support.Recognition;
 import com.support.Test;
@@ -257,6 +258,9 @@ public class TrainActivity extends Activity {
 					Cfg.getRootDir() + Cfg.getTmpPath() + File.separator,
 					Cfg.getRootDir() + Cfg.getTmpPath() + File.separator,
 					Cfg.getUserName());
+			String tmpPath = Cfg.getRootDir() + Cfg.getTmpPath() + File.separator;
+			FileAccess.Move(tmpPath + Cfg.getUserName() + Cfg.getFeaSuf(), Cfg.getRootDir() + Cfg.getUserName() + File.separator);
+			FileAccess.Move(tmpPath + Cfg.getUserName() + Cfg.getMdlSuf(), Cfg.getRootDir() + Cfg.getUserName() + File.separator);
 			
 			return "ÑµÁ·Íê³É";
 		}

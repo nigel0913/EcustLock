@@ -30,7 +30,7 @@ public class ResultDialog extends DialogFragment {
 	    builder.setView(ResultView);
 	    tvScore = (TextView) ResultView.findViewById(R.id.result_score);
 	    tvThreshold = (TextView) ResultView.findViewById(R.id.result_threshold);
-	    tvName = (TextView) ResultView.findViewById(R.id.result_name);
+	    tvName = (TextView) ResultView.findViewById(R.id.result_trainer);
 	    mListener.onSetScore();
 	    // Add action buttons
 	    builder.setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {

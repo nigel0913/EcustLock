@@ -518,7 +518,7 @@ public class GetMfcc {
 		}
 		try {
 			dos.close();
-			fos.close();
+//			fos.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -232,7 +232,7 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 			Log.v(async_tag, "doInBackground");
 			this.publishProgress(0);
 
-			short[] audioData = new short[bufferSizeInBytes/2];
+			short[] audioData = new short[bufferSizeInBytes];
 			int readsize = 0;
 			GetMfcc getMfcc = new GetMfcc();
 			File file = new File(Cfg.getRootDir() + Cfg.getTmpPath()
@@ -240,10 +240,10 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 			if (file.exists()) {
 				file.delete();
 			}
-			
+			Log.d("file.name", file.getName());
 			double[] inSamples = new double[1024];
 			while (isRecording == true) {
-				readsize = audioRecord.read(audioData, 0, bufferSizeInBytes/2);
+				readsize = audioRecord.read(audioData, 0, bufferSizeInBytes);
 
 				if (AudioRecord.ERROR_INVALID_OPERATION != readsize
 						&& AudioRecord.ERROR_BAD_VALUE != readsize) {
@@ -263,10 +263,12 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 			this.publishProgress(1);
 
 			// recognize
-			Log.d("recognize result", "start");
-//			score = Recognition.Test(Cfg.getRootDir(), Cfg.getUserName());
-			test.backupLog(score);
-			Log.d("recognize result", "end");
+			String tmpPath = Cfg.getRootDir() + Cfg.getTmpPath() + File.separator;
+			Log.d("Test", "start: tmpPath=" + tmpPath);
+			score = Recognition.Test(Cfg.getRootDir() + Cfg.getWorldMdlPath() + File.separator,
+					Cfg.getRootDir() + Cfg.getTmpPath() + File.separator,
+					Cfg.getRootDir() + Cfg.getUserName() + File.separator,
+					Cfg.getUserName());
 			Log.d("recognize result", ""+score);
 			return result;
 		}
@@ -396,7 +398,7 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 			SharedPreferences sharedPref = getSharedPreferences(getString(R.string.s_settingsPreferences), Context.MODE_PRIVATE);
 			String key = getString(R.string.s_settingsThreshold);
 			float threshold = sharedPref.getFloat(key, -50);
-			dialog.UpdateScoreView(score, threshold, "xxx");
+			dialog.UpdateScoreView(score, threshold, "admin");
 		}
 	}
 
