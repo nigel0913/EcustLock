@@ -1,10 +1,8 @@
 package com.nigel.ecustlock;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -13,11 +11,7 @@ import com.support.Cfg;
 import com.support.FileAccess;
 import com.support.GetMfcc;
 import com.support.Recognition;
-import com.support.Test;
-
 import android.app.Activity;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
@@ -30,7 +24,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class TrainActivity extends Activity {
 
