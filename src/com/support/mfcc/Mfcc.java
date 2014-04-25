@@ -5,8 +5,12 @@ public class Mfcc {
 	static int dim = 26;
 	static int p = 24;
 	static int fs = 8000;
+	static int frame = 256;
+	
 	static double[][] dct = new double[dim/2+1][p+1];
 	static double[] w = new double[dim/2+1];
+	static double[][] bank = MelBankm.melbankm(p, frame, fs, 0, 0.5);
+	static double[] hammingwin = hamming(frame);
 	
 	static public double[] mfcc(double[] x, int xlen) {
 		if (x == null)
@@ -15,7 +19,6 @@ public class Mfcc {
 		// bank = melbankm(24, 256, fs, 0, 0.5, 'm');
 		// bank = full(bank);
 		// bank = bank/max(bank(:));
-		double[][] bank = MelBankm.melbankm(24, 256, fs, 0, 0.5);
 		int height = bank.length - 1;
 		int width = bank[0].length - 1;
 		
@@ -54,13 +57,14 @@ public class Mfcc {
 			xx[i] = 1 * x[i] - 0.9375 * x[i-1];
 		}
 		
+		double[][] f = enframe(xx, frame/2);
 		
 		return null;
 	}
 	
-	static public double[][] enframe(double[] x, double[] win, int inc ) {
+	static public double[][] enframe(double[] x, int inc ) {
 		int nx = x.length - 1;
-		int nwin = win.length - 1;
+		int nwin = hammingwin.length - 1;
 		int lw = nwin;
 		int nli = nx - lw + inc;
 		int nf = nli / inc;
@@ -70,11 +74,19 @@ public class Mfcc {
 		
 		for (int i = 1; i <= nf; i++) {
 			for (int j = 1; j <= nwin; j++) {
-				f[i][j] = x[inc * (i-1) + j - 1] * win[j];
+				f[i][j] = x[inc * (i-1) + j - 1] * hammingwin[j];
 			}
 		}
 		
 		return f;
+	}
+	
+	static public double[] hamming(int n) {
+		double[] win = new double[n+1];
+		for (int i = 0; i < n; i++) {
+			win[i+1] = 0.54 - 0.46 * Math.cos(2 * Math.PI * i / ( n - 1 ));
+		}
+		return win;
 	}
 	
 	static public double[][] memset(double[][] x, double val) {

@@ -14,35 +14,35 @@ public class GetMfcc {
 	private int bankL = 0;
 	private int bankW = 0;	//bankæÿ’ÛbankW * bankL
 	private int framenum;
-	private int framelen = 256;
+	private static int framelen = 256;
 	private double[] buffer = new double[framelen * 4];
 	private int bufferSize = 0;
 	private double[] data;
 	private int dim = 26;
-	private int p = 24;
+	private static int p = 24;
 	private FileOutputStream fos = null;
 	private DataOutputStream dos = null;
-	double[][] bank = new double[p+1][framelen];
+	static double[][] bank = new double[p+1][framelen];
 	
 	int line = 0;
 	int samples = 0;
 	
 	public GetMfcc()
 	{
-		bank = melbank(p, framelen);
+		melbank(p, framelen);
 	}
 	
 	public GetMfcc(int dim)
 	{
 		this.dim = dim;
-		bank = melbank(p, framelen);
+		melbank(p, framelen);
 	}
 	
 	public GetMfcc(double fs, int dim)
 	{
 		this.fs = fs;
 		this.dim = dim;
-		bank = melbank(p, framelen);
+		melbank(p, framelen);
 	}
 	
 	public GetMfcc(double fs, int dim, int p)
@@ -50,7 +50,7 @@ public class GetMfcc {
 		this.dim = dim;
 		this.fs = fs;
 		this.p = p;
-		bank = melbank(p, framelen);
+		melbank(p, framelen);
 	}
 
 	
@@ -75,8 +75,17 @@ public class GetMfcc {
 		fs  sample rate in Hz
 	 */
 	
-	public double[][] melbank(int p, int n)
+	
+	static double kp = 0;
+	static double kn = 0;
+	public void melbank(int p, int n)
 	{
+		if (kp == p && kn == n) {
+			return ;
+		}
+		kp = p;
+		kn = n;
+		
 		final int N = n;
 		double[] mflh = new double[3];
 		mflh[1] = frq2mel(0.0);
@@ -185,8 +194,6 @@ public class GetMfcc {
 		for (int i = 1; i <= cnt; i++)
 			Log.d("v[i]", "i="+i+",v[i]="+v[i]);
 
-		double[][] bank = new double[p+1][N];
-		
 		for(int i = 1; i <= p; i++)
 			for(int j = 1; j <= 1 + fn2; j++)
 				bank[i][j] = 0;
@@ -202,11 +209,6 @@ public class GetMfcc {
 		
 		bankL = fn2 + 1;
 		bankW = p;		
-		for (int i = 1; i <= p; i++)
-			for (int j = 1; j <= 1 + fn2; j++)
-				if (bank[i][j] < 0)
-					Log.e("bank < 0", "i="+i+",j="+j+",bank[i][j]="+bank[i][j]);
-		return bank;
 	}
 	
 	/*
@@ -322,8 +324,6 @@ public class GetMfcc {
 	    for(i = 0; i < framelen; i++)   
 	    {      
 	        vector[i] = dataR[i] * dataR[i] + dataI[i] * dataI[i];    
-	        if (vector[i] < 0)
-	        	Log.e("vector[i] < 0", "i="+i);
 	    }
 	    return vector;
 	}
