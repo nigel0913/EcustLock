@@ -1,8 +1,27 @@
 package com.support.mfcc;
 
+import android.util.Log;
+
 public class MelBankm {
 
+	static double[][] x = new double[33][256];
+	static int kp = 0;
+	static int kn = 0;
+	static int kfs = 0;
+	static double kfl = 0;
+	static double kfh = 0;
+	
 	static public double[][] melbankm(int p, int n, int fs, double fl, double fh) {
+		
+		if (kp==p && kn==n && kfs==fs && kfl==fl && kfh==fh) {
+			return x;
+		}
+		kp=p;
+		kn=n;
+		kfs=fs;
+		kfl=fl;
+		kfh=fh;
+		
 		double[] mflh = new double[3];
 		double melrng = 0;
 		double melinc = 0;
@@ -14,9 +33,11 @@ public class MelBankm {
 		}
 		
 		melrng = -mflh[1] + mflh[2];	// melrng=mflh*(-1:2:1)';          % mel range
+		Log.d("mfcc", "melrng="+melrng);
 		
 		int fn2 = (int) Math.floor( n / 2 );
 		melinc = melrng / (p + 1);
+		Log.d("mfcc", "melinc="+melinc+",fn2="+fn2);
 		
 		// blim=mel2frq(mflh(1)+[0 1 p p+1]*melinc)*n/fs;
 		double[] tmp = {-1, 0, 1, p, p+1};
@@ -28,6 +49,7 @@ public class MelBankm {
 		// b4=min(fn2,ceil(blim(4))-1);    % highest FFT bin_0 required
 		int b1 = (int) (Math.floor( blim[1] ) + 1);
 		int b4 = (int) Math.min(fn2, Math.ceil(blim[4]) - 1);
+		Log.d("mfcc", "b1="+b1+",b4="+b4);
 		
 		// pf=( frq2mel( (b1:b4) * fs / n )-mflh(1) )/melinc;
 		double[] pf = new double[b4 - b1 + 2];
@@ -48,6 +70,7 @@ public class MelBankm {
 		}
 		
 		int pflen = b4 - b1 + 1;
+		Log.d("mfcc", "pflen="+pflen);
 		int[] fp = new int[pflen+1];
 		double[] pm = new double[pflen+1];
 		for (int i = 1; i <= pflen; i++) {
@@ -77,9 +100,10 @@ public class MelBankm {
 		if ( k3 == -1 ) {
 			k3 = 0;
 		}
-		
 		// r=[1+fp(1:k3) fp(k2:k4)]; % filter number_1
 		int rlen = k3 + k4 - k2 + 1;
+		Log.d("mfcc", "k2="+k2+",k3="+k3+",k4="+k4);
+		Log.d("mfcc", "rlen="+rlen);
 		int[] c = new int[rlen+1];
 		int[] r = new int[rlen+1];
 		double[] v = new double[rlen+1];
@@ -125,7 +149,6 @@ public class MelBankm {
 			}
 		}
 		
-		double[][] x = new double[p+1][1+fn2+1];
 		for (int i = 1; i <= p; i++) {
 			for (int j = 1; j <= 1+fn2; j++) {
 				x[i][j] = 0;

@@ -28,6 +28,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/str_user_manager" />
+
+    <Button
+        android:id="@+id/btn_mfcctest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="MfccTest" />
     
     <Button 
         android:id="@+id/btn_open_train"

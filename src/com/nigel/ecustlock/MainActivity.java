@@ -20,6 +20,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	Button btnUserManager = null;
 	Button btnOpenTrain = null;
 	Button btnConfig = null;
+	Button btnMfccTest = null;
 	
 	final String life_tag = "MainActivity"; 
 	
@@ -34,6 +35,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		this.btnUserManager = (Button) super.findViewById(R.id.btn_user_manager);
 		this.btnOpenTrain = (Button) super.findViewById(R.id.btn_open_train);
 		this.btnConfig = (Button) super.findViewById(R.id.btn_config);
+		this.btnMfccTest = (Button) super.findViewById(R.id.btn_mfcctest);
 		
 		if (LockService.isRunning(getApplicationContext())) {
 			this.toggleService.setChecked(true);
@@ -46,6 +48,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		this.btnUserManager.setOnClickListener(this);
 		this.btnOpenTrain.setOnClickListener(this);
 		this.btnConfig.setOnClickListener(this);
+		this.btnMfccTest.setOnClickListener(this);
 	}
 	
 	@Override
@@ -120,6 +123,9 @@ public class MainActivity extends Activity implements OnClickListener {
 				break;
 			case R.id.btn_user_manager:
 				intent = new Intent(MainActivity.this, PasswordActivity.class);
+				MainActivity.this.startActivity(intent);
+			case R.id.btn_mfcctest:
+				intent = new Intent(MainActivity.this, MfccTestActivity.class);
 				MainActivity.this.startActivity(intent);
 			default:
 				break;
