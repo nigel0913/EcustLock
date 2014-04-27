@@ -9,13 +9,18 @@ public class Mfcc {
 	
 	static double[][] dct = new double[dim/2+1][p+1];
 	static double[] w = new double[dim/2+1];
-	static double[][] bank = MelBankm.melbankm(p, frame, fs, 0, 0.5);
-	static double[] hammingwin = hamming(frame);
+	static double[][] bank = null;
+	static double[] hammingwin = null;
 	
-	static public double[] mfcc(double[] x, int xlen) {
-		if (x == null)
-			return null;
+	public static Mfcc getInstance() {
+		return INSTANCE;
+	}
+	
+	private static Mfcc INSTANCE = new Mfcc();
+	private Mfcc() {
+		hammingwin = hamming(frame);
 		
+		bank = MelBankm.melbankm(p, frame, fs, 0, 0.5);
 		// bank = melbankm(24, 256, fs, 0, 0.5, 'm');
 		// bank = full(bank);
 		// bank = bank/max(bank(:));
@@ -49,6 +54,13 @@ public class Mfcc {
 			w[i] = w[i] / maxW;
 		}
 		
+		
+	}
+	
+	public double[] mfcc(double[] x, int xlen) {
+		if (x == null)
+			return null;
+
 		// xx = double(x);
 		// xx = filter([1 -0.9375], 1, xx);
 		double[] xx = new double[xlen+1];
