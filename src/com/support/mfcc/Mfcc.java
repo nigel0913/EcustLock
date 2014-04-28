@@ -9,8 +9,11 @@ public class Mfcc {
 	
 	static double[][] dct = new double[dim/2+1][p+1];
 	static double[] w = new double[dim/2+1];
+	static double[] c1 = new double[dim/2+1];
 	static double[][] bank = null;
 	static double[] hammingwin = null;
+	static int bankH = 0;
+	static int bankW = 0;
 	
 	public static Mfcc getInstance() {
 		return INSTANCE;
@@ -21,20 +24,22 @@ public class Mfcc {
 		hammingwin = hamming(frame);
 		
 		bank = MelBankm.melbankm(p, frame, fs, 0, 0.5);
+		
+		int fn2 = (int) Math.floor( frame / 2 );
 		// bank = melbankm(24, 256, fs, 0, 0.5, 'm');
 		// bank = full(bank);
 		// bank = bank/max(bank(:));
-		int height = bank.length - 1;
-		int width = bank[0].length - 1;
+		bankH = p;
+		bankW = fn2 + 1;
 		
 		double bankMax = -1e30;
-		for (int i = 1; i <= height; i++) {
-			for (int j = 1; j <= width; j++) {
+		for (int i = 1; i <= bankH; i++) {
+			for (int j = 1; j <= bankW; j++) {
 				bankMax = Math.max(bankMax, bank[i][j]);
 			}
 		}
-		for (int i = 1; i <= height; i++) {
-			for (int j = 1; j <= width; j++) {
+		for (int i = 1; i <= bankH; i++) {
+			for (int j = 1; j <= bankW; j++) {
 				bank[i][j] = bank[i][j] / bankMax;
 			}
 		}
@@ -57,7 +62,7 @@ public class Mfcc {
 		
 	}
 	
-	public double[] mfcc(double[] x, int xlen) {
+	public double[][] mfcc(double[] x, int xlen) {
 		if (x == null)
 			return null;
 
@@ -70,13 +75,60 @@ public class Mfcc {
 		}
 		
 		double[][] f = enframe(xx, frame/2);
+		int framenum = f.length;
+		
 		double[] vector = new double[frame+1];
-		for (int i = 1; i < f.length; i++) {
+		double[] tmp = new double[p+1];
+		double[][] m = new double[framenum+1][dim/2+1];
+		double[][] dtm = new double[framenum+1][dim/2+1];
+		double[][] c2 = new double[framenum][dim/2+1];
+		for (int i = 1; i < framenum; i++) {
+			
 			for (int j = 1; j <= frame; j++)
 				vector[j-1] = f[i][j];
+			vector = fft(vector, frame);
+			for (int j = frame; j >= 1; j--)
+				vector[j] = vector[j-1];
+			
+			for (int j = 1; j <= bankH; j++) {
+				tmp[j] = 0;
+				for (int k = 1; k <= bankW; k++) {
+					tmp[j] += bank[j][k] * vector[k];
+				}
+			}
+			
+			for (int j = 1; j <= dim/2; j++) {
+				c1[j] = 0;
+				for (int k = 1; k <= bankH; k++) {
+					c1[j] += dct[j][k] * Math.log(tmp[k]);
+				}
+			}
+			
+			for (int j = 1; j <= dim/2; j++) {
+				m[i][j] = c1[j] * w[j];
+			}
+			
 		}
 		
-		return null;
+		memset(dtm, 0);
+		for (int i = 3; i <= framenum - 2; i++) {
+			// dtm(i,:) = -2*m(i-2,:)-m(i-1,:)+m(i+1,:)+2*m(i+2,:);
+			// dtm = dtm/3;
+			for (int j = 1; j <= dim/2; j++) {
+				dtm[i][j] = (-2 * m[i-2][j] - m[i-1][j] + m[i+1][j] + 2 * m[i+2][j]) / 3;
+			}
+		}
+		
+		for (int i = 3; i <= framenum - 2; i++) {
+			for (int j = 1; j <= dim/2; j++) {
+				c2[i-2][j] = m[i][j];
+			}
+			for (int j = dim/2+1; j <= dim; j++) {
+				c2[i-2][j] = dtm[i][j-dim/2];
+			}
+		}
+		
+		return c2;
 	}
 	
 	/*

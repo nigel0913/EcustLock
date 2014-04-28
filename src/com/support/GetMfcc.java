@@ -437,12 +437,7 @@ public class GetMfcc {
 			{
 				for(int k = 1; k <= bankL; k++) {
 					tmp[j] += vector[k] * bank[j][k];
-					if (vector[k] * bank[j][k] < 0) {
-						Log.e("vector[k] * bank[j][k] < 0", ""+(vector[k] * bank[j][k]) );
-					}
 				}
-				if (tmp[j] < 0) 
-					Log.e("tm[j]", "< 0");
 				tmp[j] = Math.log(tmp[j]);
 			}
 			
