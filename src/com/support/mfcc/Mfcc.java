@@ -229,7 +229,7 @@ public class Mfcc {
 		
 		for (int i = 1; i <= nf; i++) {
 			for (int j = 1; j <= nwin; j++) {
-				f[i][j] = x[inc * (i-1) + j - 1] * hammingwin[j];
+				f[i][j] = x[inc * (i-1) + j] * hammingwin[j];
 			}
 		}
 		
