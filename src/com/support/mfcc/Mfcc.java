@@ -15,6 +15,8 @@ public class Mfcc {
 	static int bankH = 0;
 	static int bankW = 0;
 	
+	int mfccNum = 0;
+	
 	public static Mfcc getInstance() {
 		return INSTANCE;
 	}
@@ -75,14 +77,14 @@ public class Mfcc {
 		}
 		
 		double[][] f = enframe(xx, frame/2);
-		int framenum = f.length;
+		int framenum = f.length - 1;
 		
 		double[] vector = new double[frame+1];
 		double[] tmp = new double[p+1];
 		double[][] m = new double[framenum+1][dim/2+1];
 		double[][] dtm = new double[framenum+1][dim/2+1];
-		double[][] c2 = new double[framenum][dim/2+1];
-		for (int i = 1; i < framenum; i++) {
+		double[][] c2 = new double[framenum][dim+1];
+		for (int i = 1; i <= framenum; i++) {
 			
 			for (int j = 1; j <= frame; j++)
 				vector[j-1] = f[i][j];
@@ -128,7 +130,13 @@ public class Mfcc {
 			}
 		}
 		
+		mfccNum = framenum - 4;
+		
 		return c2;
+	}
+	
+	public int getMfccNum() {
+		return mfccNum;
 	}
 	
 	/*
