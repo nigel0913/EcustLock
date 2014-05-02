@@ -7,12 +7,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import com.support.Cfg;
+import com.support.SqlOpenHelper;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -36,6 +39,8 @@ public class LoginActivity extends Activity {
 	
 	String LOG_TAG = "LoginActivity";
 	
+	SQLiteDatabase database = null;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -47,18 +52,29 @@ public class LoginActivity extends Activity {
 		this.evPassword = (EditText) super.findViewById(R.id.et_password);
 		
 		this.btnLogin.setOnClickListener( new LoginOnClickListener() );
+		
+		SqlOpenHelper helper = new SqlOpenHelper(getApplicationContext());
+		database = helper.getReadableDatabase();
+		
 		Init();
 	}
 	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		
+		database.close();
+	}
+	
 	public void Init() {
-		SharedPreferences sharedPref = getSharedPreferences(getString(R.string.s_settingsPreferences), Context.MODE_PRIVATE);
-		String key = getString(R.string.s_settingsPasswordKey);
-		// set default password = 0000
-		if (!sharedPref.contains(key)) {
-			SharedPreferences.Editor editor = sharedPref.edit();
-			editor.putString(key, "0000");
-			editor.commit();
-		}
+//		SharedPreferences sharedPref = getSharedPreferences(getString(R.string.s_settingsPreferences), Context.MODE_PRIVATE);
+//		String key = getString(R.string.s_settingsPasswordKey);
+//		// set default password = 0000
+//		if (!sharedPref.contains(key)) {
+//			SharedPreferences.Editor editor = sharedPref.edit();
+//			editor.putString(key, "0000");
+//			editor.commit();
+//		}
 		boolean sdcardExists = false;
 		if (sdcardExists = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
 			String rootDir = Environment.getExternalStorageDirectory().toString() + File.separator + this.recDir + File.separator;
@@ -76,23 +92,45 @@ public class LoginActivity extends Activity {
 
 		@Override
 		public void onClick(View v) {
-			SharedPreferences sharedPref = getSharedPreferences(getString(R.string.s_settingsPreferences), Context.MODE_PRIVATE);
-			String key = getString(R.string.s_settingsPasswordKey);
-			String pwd = sharedPref.getString(key, "0000");
+			String username = evUsername.getText().toString();
+			String password = evPassword.getText().toString();
 			
-			// TODO add user name verify
+			if (username.equals("")) {
+				Toast.makeText(LoginActivity.this, "用户名不能为空", Toast.LENGTH_SHORT).show();
+				return ;
+			}
 			
-			if (evPassword.getText().toString().equals(pwd)) {
+			String[] columns = {"username", "password"};
+			String[] params = {username};
+			Cursor cursor = database.query(
+					SqlOpenHelper.TABLE_USERINFO, columns, "username=?", params, null, null, null);
+			
+			if ( cursor.getCount() == 0 ) {
+				Toast.makeText(LoginActivity.this, "用户不存在", Toast.LENGTH_SHORT).show();
+				return ;
+			}
+			
+			String correctPwd = "";
+			
+			// TODO need to judge cursor.getCount()
+			cursor.moveToFirst();
+			while ( !cursor.isAfterLast() ) {
+				correctPwd = cursor.getString(1);
+				cursor.moveToNext();
+			}
+//			Log.d("database", cursor.getCount() + "[" + username + "][" + password + "][" + correctPwd + "]");
+			if (password.equals(correctPwd)) {
 				Log.v(LOG_TAG, "in");
 				Intent intent = new Intent(LoginActivity.this, MainActivity.class);
 				// TODO modify user_name tags
-				intent.putExtra("user_name", evUsername.getText().toString());
+				intent.putExtra("user_name", username);
 				LoginActivity.this.startActivity(intent);
 				finish();
 			}
 			else {
 				Toast.makeText(LoginActivity.this, "密码错误", Toast.LENGTH_SHORT).show();
 			}
+			
 		}
 		
 	}
