@@ -11,6 +11,7 @@ import com.support.Cfg;
 import com.support.GetMfcc;
 import com.support.Recognition;
 import com.support.Test;
+import com.support.mfcc.Mfcc;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -234,7 +235,7 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 
 			short[] audioData = new short[bufferSizeInBytes];
 			int readsize = 0;
-			GetMfcc getMfcc = new GetMfcc();
+
 			File file = new File(Cfg.getRootDir() + Cfg.getTmpPath()
 					+ File.separator + Cfg.getUserName() + Cfg.getFeaSuf());
 			if (file.exists()) {
@@ -252,7 +253,8 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 						inSamples[i] = audioData[i];
 					}
 
-					getMfcc.writemfcc(file, inSamples, readsize);
+//					getMfcc.writemfcc(file, inSamples, readsize);
+					Mfcc.getInstance().write(file, inSamples, readsize);
 				}
 			}
 

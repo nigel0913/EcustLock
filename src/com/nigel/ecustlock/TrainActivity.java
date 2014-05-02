@@ -11,6 +11,8 @@ import com.support.Cfg;
 import com.support.FileAccess;
 import com.support.GetMfcc;
 import com.support.Recognition;
+import com.support.mfcc.Mfcc;
+
 import android.app.Activity;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
@@ -201,7 +203,7 @@ public class TrainActivity extends Activity {
 			this.publishProgress("ÕýÔÚÂ¼Òô...");
 			
 			short[] audioData = new short[bufferSizeInBytes];
-			double[] inSamples = new double[bufferSizeInBytes];
+			double[] inSamples = new double[bufferSizeInBytes+1];
 			int readsize = 0;
 			
 			PrintWriter writer = null;
@@ -215,7 +217,6 @@ public class TrainActivity extends Activity {
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
-			GetMfcc getMfcc = new GetMfcc();
 			
 			File fileMfcc = new File(Cfg.getRootDir() + Cfg.getTmpPath() + 
 					File.separator + Cfg.getUserName() + Cfg.getFeaSuf());
@@ -230,12 +231,13 @@ public class TrainActivity extends Activity {
 						&& AudioRecord.ERROR_BAD_VALUE != readsize) {
 
 					for (int i=0; i<readsize; i++){
-						inSamples[i] = audioData[i];
+						inSamples[i+1] = audioData[i];
 						
 						writer.println(""+audioData[i]);
 					}
 
-					getMfcc.writemfcc(fileMfcc, inSamples, readsize);
+//					getMfcc.writemfcc(fileMfcc, inSamples, readsize);
+					Mfcc.getInstance().write(fileMfcc, inSamples, readsize);
 				}
 			}
 			

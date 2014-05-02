@@ -124,6 +124,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			case R.id.btn_user_manager:
 				intent = new Intent(MainActivity.this, PasswordActivity.class);
 				MainActivity.this.startActivity(intent);
+				break;
 			case R.id.btn_mfcctest:
 				intent = new Intent(MainActivity.this, MfccTestActivity.class);
 				MainActivity.this.startActivity(intent);

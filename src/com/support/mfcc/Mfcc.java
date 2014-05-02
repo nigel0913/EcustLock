@@ -1,5 +1,10 @@
 package com.support.mfcc;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 public class Mfcc {
 
 	static int dim = 26;
@@ -15,6 +20,11 @@ public class Mfcc {
 	static int bankH = 0;
 	static int bankW = 0;
 	
+	FileOutputStream fos = null;
+	
+	static double[] buffer = new double[frame * 4 + 1];
+	static int bufferSize = 0;
+	
 	int mfccNum = 0;
 	
 	public static Mfcc getInstance() {
@@ -23,6 +33,10 @@ public class Mfcc {
 	
 	private static Mfcc INSTANCE = new Mfcc();
 	private Mfcc() {
+		for (int i = 0; i < frame * 4; i++) {
+			buffer[i] = 0;
+		}
+		
 		hammingwin = hamming(frame);
 		
 		bank = MelBankm.melbankm(p, frame, fs, 0, 0.5);
@@ -60,10 +74,79 @@ public class Mfcc {
 		for (int i = 1; i <= dim/2; i++) {
 			w[i] = w[i] / maxW;
 		}
-		
-		
 	}
 	
+	/**
+	 * @brief the main entrance method
+	 * @param data subscript start from 1
+	 * @param len
+	 */
+	public void write(File file, double[] data, int len) {
+		int xlen = bufferSize + len;
+		double[] x = new double[xlen + 1];
+		for (int i = 1; i <= bufferSize; i++) {
+			x[i] = buffer[i];
+		}
+		for (int i = bufferSize + 1; i <= xlen; i++) {
+			x[i] = data[i - bufferSize];
+		}
+		
+		final int halfframe = frame / 2;
+		
+		if (xlen < 6 * halfframe) {	// 不足5帧（即小于6个半帧的长度）
+			bufferSize = xlen;
+			for (int i = 1; i <= xlen; i++) {
+				buffer[i] = x[i];
+			}
+			return ;
+		}
+		
+		int nhf = xlen / halfframe;
+		bufferSize = xlen - (nhf-5) * halfframe;
+		for (int i = (nhf-5) * halfframe + 1; i <= xlen; i++) {
+			buffer[i] = x[i];
+		}
+		
+		double[][] ans = mfcc(x, xlen);
+		if (ans == null) 
+			return ;
+		
+		try {
+			fos = new FileOutputStream(file, true);
+		} catch (FileNotFoundException e) {
+			return ;
+		}
+		
+		byte[] serial = new byte[4];
+		for (int i = 1; i <= mfccNum; i++) {
+			for (int j = 1; j <= dim; j++) {
+				float tmp = (float) ans[i][j];
+				int y = Float.floatToIntBits(tmp);
+				for (int k = 0; k < 4; k++)
+				{
+					serial[k] = (byte) (y & 255);
+					y = y >> 8;
+				}
+				try {
+					fos.write(serial);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		try {
+			fos.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * @param x subscript start from 1
+	 * @param xlen
+	 * @return
+	 */
 	public double[][] mfcc(double[] x, int xlen) {
 		if (x == null)
 			return null;
