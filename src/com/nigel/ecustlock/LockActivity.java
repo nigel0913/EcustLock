@@ -233,7 +233,7 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 			Log.v(async_tag, "doInBackground");
 			this.publishProgress(0);
 
-			short[] audioData = new short[bufferSizeInBytes];
+			short[] audioData = new short[bufferSizeInBytes+1];
 			int readsize = 0;
 
 			File file = new File(Cfg.getRootDir() + Cfg.getTmpPath()
@@ -250,7 +250,7 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 						&& AudioRecord.ERROR_BAD_VALUE != readsize) {
 
 					for (int i=0; i<readsize; i++){
-						inSamples[i] = audioData[i];
+						inSamples[i+1] = audioData[i];
 					}
 
 //					getMfcc.writemfcc(file, inSamples, readsize);
