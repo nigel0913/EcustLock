@@ -95,6 +95,17 @@ public class LoginActivity extends Activity {
 			String username = evUsername.getText().toString();
 			String password = evPassword.getText().toString();
 			
+			// TODO need delete
+//			if (true) {
+//				Log.v(LOG_TAG, "in");
+//				Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+//				// TODO modify user_name tags
+//				intent.putExtra("user_name", username);
+//				LoginActivity.this.startActivity(intent);
+//				finish();
+//			}
+			
+			
 			if (username.equals("")) {
 				Toast.makeText(LoginActivity.this, "用户名不能为空", Toast.LENGTH_SHORT).show();
 				return ;

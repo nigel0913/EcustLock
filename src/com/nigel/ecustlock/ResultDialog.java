@@ -33,14 +33,14 @@ public class ResultDialog extends DialogFragment {
 	    tvName = (TextView) ResultView.findViewById(R.id.result_trainer);
 	    mListener.onSetScore();
 	    // Add action buttons
-	    builder.setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
+	    builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 	               @Override
 	               public void onClick(DialogInterface dialog, int id) {
 	                   // sign in the user ...
 	            	   mListener.onDialogPositiveClick(ResultDialog.this);
 	               }
 	           })
-	           .setNegativeButton(R.string.str_no, new DialogInterface.OnClickListener() {
+	           .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
 	               public void onClick(DialogInterface dialog, int id) {
 	            	   mListener.onDialogNegativeClick(ResultDialog.this);
 	               }

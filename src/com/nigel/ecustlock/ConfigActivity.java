@@ -11,7 +11,6 @@ import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 public class ConfigActivity extends Activity {
 	

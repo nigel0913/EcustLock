@@ -36,7 +36,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/et_new_trainer"
-        android:text="@string/str_train" />
+        android:text="@string/train" />
 
     <TextView
         android:id="@+id/tv_info"
@@ -46,7 +46,7 @@
         android:layout_below="@+id/btn_train"
         android:scrollbars="vertical"
         android:singleLine="false"
-        android:text="@string/str_train" />
+        android:text="@string/train" />
 
     <Button
         android:id="@+id/btn_test"

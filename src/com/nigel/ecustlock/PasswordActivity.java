@@ -1,9 +1,15 @@
 package com.nigel.ecustlock;
 
 
+import com.support.Cfg;
+import com.support.SqlOpenHelper;
+
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -24,11 +30,13 @@ public class PasswordActivity extends Activity {
 	private String sPwdNew;
 	private String sPwdComfirm;
 	
+	SQLiteDatabase database = null;
+	
 	String ac_tag = "PasswordActivity";
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_user_manager);
+		setContentView(R.layout.activity_modify_passwd);
 		
 		Log.v(ac_tag, "onCreate()");
 		
@@ -37,6 +45,15 @@ public class PasswordActivity extends Activity {
 		m_EditPwdOld = (EditText) this.findViewById(R.id.et_UM_old_pwd);
 		m_EditPwdNew = (EditText) this.findViewById(R.id.et_UM_new_pwd);
 		m_EditPwdComfirm = (EditText) this.findViewById(R.id.et_UM_comfirm_pwd);
+		
+		SqlOpenHelper helper = new SqlOpenHelper(getApplicationContext());
+		database = helper.getWritableDatabase();
+	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		database.close();
 	}
 	
 	@Override
@@ -49,28 +66,42 @@ public class PasswordActivity extends Activity {
 
 		@Override
 		public void onClick(View v) {
-			SharedPreferences sharedPref = getSharedPreferences(getString(R.string.s_settingsPreferences), Context.MODE_PRIVATE);
-			String key = getString(R.string.s_settingsPasswordKey);
-			String pwd = sharedPref.getString(key, "0000");
 			sPwdOld = m_EditPwdOld.getText().toString();
 			sPwdNew = m_EditPwdNew.getText().toString();
 			sPwdComfirm = m_EditPwdComfirm.getText().toString();
 			
-			if ( sPwdNew.equals(sPwdComfirm) ){
-				if (sPwdOld.equals(pwd)) {
-					SharedPreferences.Editor editor = sharedPref.edit();
-					editor.putString(key, m_EditPwdNew.getText().toString());
-					editor.commit();
-					Toast.makeText(PasswordActivity.this, "修改成功", Toast.LENGTH_SHORT).show();
-					finish();
-				}
-				else {
-					Toast.makeText(PasswordActivity.this, "密码错误", Toast.LENGTH_SHORT).show();
-				}
+			String name = Cfg.getUserName();
+			String[] columns = {SqlOpenHelper.USER_NAME, SqlOpenHelper.USER_PWD};
+			String[] params = {name};
+			Cursor result = database.query(SqlOpenHelper.TABLE_USERINFO, columns, "username=?", params, null, null, null);
+			
+			if ( result.getCount() == 0 ) {
+				Toast.makeText(PasswordActivity.this, "该用户不存在", Toast.LENGTH_SHORT).show();
+				return ;
 			}
-			else {
+			
+			if ( !sPwdNew.equals(sPwdComfirm) ) {
 				Toast.makeText(PasswordActivity.this, "确认密码不一致", Toast.LENGTH_SHORT).show();
+				return ;
 			}
+			
+			result.moveToFirst();
+			while ( !result.isAfterLast() ) {
+				String pwd = result.getString(1);
+				if ( !sPwdOld.equals(pwd) ) {
+					Toast.makeText(PasswordActivity.this, "密码错误", Toast.LENGTH_SHORT).show();
+					return ;
+				}
+				result.moveToNext();
+			}
+			
+			ContentValues values = new ContentValues();
+			values.put(SqlOpenHelper.USER_NAME, name);
+			values.put(SqlOpenHelper.USER_PWD, sPwdNew);
+			database.update(SqlOpenHelper.TABLE_USERINFO, values, "username=?", params);
+			
+			Toast.makeText(PasswordActivity.this, "修改成功", Toast.LENGTH_SHORT).show();
+			finish();
 		}
 		
 	}

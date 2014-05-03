@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="4dp" >
+
+    <Button
+        android:id="@+id/btn_modify_user"
+        android:layout_width="96dp"
+        android:layout_height="32dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text="@string/modify_password"
+        android:textSize="14sp" />
+
+    <Button
+        android:id="@+id/btn_delete_user"
+        android:layout_width="96dp"
+        android:layout_height="32dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:text="@string/delete_user"
+        android:textSize="14sp" />
+
+</RelativeLayout>

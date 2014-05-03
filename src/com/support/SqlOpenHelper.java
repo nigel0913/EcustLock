@@ -11,6 +11,11 @@ public class SqlOpenHelper extends SQLiteOpenHelper {
 	public static final int VERSION = 1;
 	
 	public static final String TABLE_USERINFO = "user_info";
+	public static final String USER_ID = "id";
+	public static final String USER_NAME = "username";
+	public static final String USER_PWD = "password";
+	public static final String USER_TRAIN_TIME = "train_time";
+	public static final String USER_LOGIN_TIME = "last_login_time";
 	
 	public SqlOpenHelper(Context context) {
 		super(context, DBNAME, null, VERSION);
@@ -30,11 +35,11 @@ public class SqlOpenHelper extends SQLiteOpenHelper {
 	
 	private void createDatabase(SQLiteDatabase db) {
 		db.execSQL("create table " + TABLE_USERINFO + " ("
-				+ "id integer primary key autoincrement not null,"
-				+ "username varchar(16),"
-				+ "password varchar(16),"
-				+ "train_time timestamp,"
-				+ "last_login_time timestamp"
+				+ USER_ID + " integer primary key autoincrement not null,"
+				+ USER_NAME + " varchar(16),"
+				+ USER_NAME + " varchar(16),"
+				+ USER_TRAIN_TIME + " timestamp,"
+				+ USER_LOGIN_TIME + " timestamp"
 				+ ");");
 		
 		ContentValues values = new ContentValues();

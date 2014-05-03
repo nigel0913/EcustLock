@@ -23,11 +23,11 @@
         
     </RelativeLayout>
     
-    <Button 
-        android:id="@+id/btn_user_manager"
+    <Button
+        android:id="@+id/btn_modify_passwd"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/str_user_manager" />
+        android:text="@string/modify_password" />
 
     <Button
         android:id="@+id/btn_mfcctest"
@@ -39,12 +39,18 @@
         android:id="@+id/btn_open_train"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/str_train"/>
-    
-    <Button 
+        android:text="@string/train"/>
+
+    <Button
         android:id="@+id/btn_config"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/str_config"/>
+        android:text="@string/config_setting" />
+
+    <Button
+        android:id="@+id/btn_user_manager"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/user_manager" />
 
 </LinearLayout>

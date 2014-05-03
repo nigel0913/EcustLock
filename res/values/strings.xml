@@ -8,21 +8,24 @@
     <string name="s_settingsPasswordKey">com.nigel.password</string>
     <string name="s_settingsSecuity">com.nigel.security</string>
     <string name="s_settingsThreshold">com.nigel.threshold</string>
-    <string name="str_user_manager">用户管理</string>
+    <string name="user_manager">用户管理</string>
     <string name="default_time">00:00</string>
-    <string name="str_password">密码</string>
-    <string name="str_username">用户名</string>
-    <string name="str_login">登陆</string>
-    <string name="str_old_password">原密码</string>
-    <string name="str_new_password">新密码</string>
-    <string name="str_password_comfirm">密码确认</string>
-    <string name="str_modify_password">修改密码</string>
-    <string name="str_train">训练</string>
-    <string name="str_config">参数设置</string>
-    <string name="str_threshold">阈值</string>
-    <string name="str_yes">是</string>
-    <string name="str_no">否</string>
+    <string name="password">密码</string>
+    <string name="username">用户名</string>
+    <string name="login">登陆</string>
+    <string name="old_password">原密码</string>
+    <string name="new_password">新密码</string>
+    <string name="password_comfirm">密码确认</string>
+    <string name="modify_password">修改密码</string>
+    <string name="train">训练</string>
+    <string name="config_setting">参数设置</string>
+    <string name="threshold">阈值</string>
+    <string name="yes">是</string>
+    <string name="no">否</string>
     <string name="save">保存</string>
+    <string name="add_user">添加用户</string>
+    <string name="delete_user">删除用户</string>
+    <string name="register">注册</string>
     
 
 </resources>

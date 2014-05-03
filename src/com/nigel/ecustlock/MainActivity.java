@@ -1,6 +1,7 @@
 package com.nigel.ecustlock;
 
 import com.nigel.service.LockService;
+import com.support.Cfg;
 
 import android.os.Bundle;
 import android.app.Activity;
@@ -17,10 +18,11 @@ import android.widget.Switch;
 public class MainActivity extends Activity implements OnClickListener {
 
 	Switch toggleService = null;
-	Button btnUserManager = null;
+	Button btnModifyPwd = null;
 	Button btnOpenTrain = null;
 	Button btnConfig = null;
 	Button btnMfccTest = null;
+	Button btnUserManager = null;
 	
 	final String life_tag = "MainActivity"; 
 	
@@ -32,23 +34,35 @@ public class MainActivity extends Activity implements OnClickListener {
 		Log.v(life_tag, "onCreate");
 		
 		this.toggleService = (Switch) super.findViewById(R.id.service_switch);
-		this.btnUserManager = (Button) super.findViewById(R.id.btn_user_manager);
+		this.btnModifyPwd = (Button) super.findViewById(R.id.btn_modify_passwd);
 		this.btnOpenTrain = (Button) super.findViewById(R.id.btn_open_train);
 		this.btnConfig = (Button) super.findViewById(R.id.btn_config);
 		this.btnMfccTest = (Button) super.findViewById(R.id.btn_mfcctest);
+		this.btnUserManager = (Button) super.findViewById(R.id.btn_user_manager);
 		
-		if (LockService.isRunning(getApplicationContext())) {
-			this.toggleService.setChecked(true);
-		}
-		else {
-			this.toggleService.setChecked(false);
-		}
-		this.toggleService.setOnCheckedChangeListener( new StartServiceOnCheckedChangeListenerImpl() );
-		
-		this.btnUserManager.setOnClickListener(this);
+		this.btnModifyPwd.setOnClickListener(this);
 		this.btnOpenTrain.setOnClickListener(this);
 		this.btnConfig.setOnClickListener(this);
 		this.btnMfccTest.setOnClickListener(this);
+		
+		Intent intent = getIntent();
+		String userName = intent.getStringExtra("user_name");
+		if ( !userName.equals("admin") ) {
+			this.btnUserManager.setVisibility(View.GONE);
+			this.toggleService.setVisibility(View.GONE);
+			Cfg.setUserName(userName);
+		}
+		else {
+			this.btnUserManager.setOnClickListener(this);
+			Cfg.setUserName(userName);
+			if (LockService.isRunning(getApplicationContext())) {
+				this.toggleService.setChecked(true);
+			}
+			else {
+				this.toggleService.setChecked(false);
+			}
+			this.toggleService.setOnCheckedChangeListener( new StartServiceOnCheckedChangeListenerImpl() );
+		}
 	}
 	
 	@Override
@@ -121,13 +135,18 @@ public class MainActivity extends Activity implements OnClickListener {
 				intent = new Intent(MainActivity.this, TrainActivity.class);
 				MainActivity.this.startActivity(intent);
 				break;
-			case R.id.btn_user_manager:
+			case R.id.btn_modify_passwd:
 				intent = new Intent(MainActivity.this, PasswordActivity.class);
 				MainActivity.this.startActivity(intent);
 				break;
 			case R.id.btn_mfcctest:
 				intent = new Intent(MainActivity.this, MfccTestActivity.class);
 				MainActivity.this.startActivity(intent);
+				break;
+			case R.id.btn_user_manager:
+				intent = new Intent(MainActivity.this, UsersActivity.class);
+				MainActivity.this.startActivity(intent);
+				break;
 			default:
 				break;
 		}
