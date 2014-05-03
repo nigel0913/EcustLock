@@ -70,7 +70,7 @@ public class PasswordActivity extends Activity {
 			sPwdNew = m_EditPwdNew.getText().toString();
 			sPwdComfirm = m_EditPwdComfirm.getText().toString();
 			
-			String name = Cfg.getUserName();
+			String name = Cfg.getInstance().getUserName();
 			String[] columns = {SqlOpenHelper.USER_NAME, SqlOpenHelper.USER_PWD};
 			String[] params = {name};
 			Cursor result = database.query(SqlOpenHelper.TABLE_USERINFO, columns, "username=?", params, null, null, null);

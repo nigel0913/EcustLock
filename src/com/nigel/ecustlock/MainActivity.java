@@ -1,5 +1,7 @@
 package com.nigel.ecustlock;
 
+import java.io.File;
+
 import com.nigel.service.LockService;
 import com.support.Cfg;
 
@@ -26,6 +28,8 @@ public class MainActivity extends Activity implements OnClickListener {
 	
 	final String life_tag = "MainActivity"; 
 	
+	boolean trained = false;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -45,16 +49,17 @@ public class MainActivity extends Activity implements OnClickListener {
 		this.btnConfig.setOnClickListener(this);
 		this.btnMfccTest.setOnClickListener(this);
 		
+		
 		Intent intent = getIntent();
 		String userName = intent.getStringExtra("user_name");
 		if ( !userName.equals("admin") ) {
 			this.btnUserManager.setVisibility(View.GONE);
 			this.toggleService.setVisibility(View.GONE);
-			Cfg.setUserName(userName);
+			Cfg.getInstance().setUserName(userName);
 		}
 		else {
 			this.btnUserManager.setOnClickListener(this);
-			Cfg.setUserName(userName);
+			Cfg.getInstance().setUserName(userName);
 			if (LockService.isRunning(getApplicationContext())) {
 				this.toggleService.setChecked(true);
 			}
@@ -63,6 +68,8 @@ public class MainActivity extends Activity implements OnClickListener {
 			}
 			this.toggleService.setOnCheckedChangeListener( new StartServiceOnCheckedChangeListenerImpl() );
 		}
+		
+		userCheck();
 	}
 	
 	@Override
@@ -106,6 +113,30 @@ public class MainActivity extends Activity implements OnClickListener {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
+	}
+	
+	/**
+	 * 检查用户目录结构
+	 */
+	private void userCheck() {
+		String username = Cfg.getInstance().getUserName();
+		String rootDir = Cfg.getInstance().getRootDir();
+		String userFileDir = rootDir + Cfg.getInstance().getUsersPath() + File.separator
+				+ username + File.separator;
+		File userDir = new File(userFileDir);
+		Log.d("userDir", userDir.getName());
+		if (!userDir.exists())
+			userDir.mkdirs();
+		
+		File featrue = new File(userFileDir + username + File.separator + Cfg.getInstance().getFeaSuf());
+		File model = new File(userFileDir + username + File.separator + Cfg.getInstance().getMdlSuf());
+		if ( featrue.exists() && model.exists() ) {
+			trained = true;
+		}
+		else {
+			trained = false;
+		}
+		Log.d("trained", ""+trained);
 	}
 	
 	private class StartServiceOnCheckedChangeListenerImpl implements OnCheckedChangeListener {

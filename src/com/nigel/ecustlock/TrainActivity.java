@@ -145,11 +145,11 @@ public class TrainActivity extends Activity {
 					
 					int[] Len = {320, 384, 512, 1024};
 					File[] cmp = new File[4];
-					File txt = new File(Cfg.getRootDir() + Cfg.getTmpPath() 
-							+ File.separator + Cfg.getUserName() + ".txt");
+					File txt = new File(Cfg.getInstance().getRootDir() + Cfg.getInstance().getTmpPath() 
+							+ File.separator + Cfg.getInstance().getUserName() + ".txt");
 					for (int i=0; i<Len.length; i++) {
-						String filename = Cfg.getRootDir() + Cfg.getTmpPath() + 
-								File.separator + Cfg.getUserName() + Cfg.getFeaSuf() +Len[i];
+						String filename = Cfg.getInstance().getRootDir() + Cfg.getInstance().getTmpPath() + 
+								File.separator + Cfg.getInstance().getUserName() + Cfg.getInstance().getFeaSuf() +Len[i];
 						System.out.println(filename);
 						cmp[i] = new File(filename);
 						if (cmp[i].exists()) {
@@ -208,8 +208,8 @@ public class TrainActivity extends Activity {
 			
 			PrintWriter writer = null;
 			try {
-				File txt = new File(Cfg.getRootDir() + Cfg.getTmpPath() 
-						+ File.separator + Cfg.getUserName() + ".txt");
+				File txt = new File(Cfg.getInstance().getRootDir() + Cfg.getInstance().getTmpPath() 
+						+ File.separator + Cfg.getInstance().getUserName() + ".txt");
 				if (txt.exists()) {
 					txt.delete();
 				}
@@ -218,8 +218,8 @@ public class TrainActivity extends Activity {
 				e.printStackTrace();
 			}
 			
-			File fileMfcc = new File(Cfg.getRootDir() + Cfg.getTmpPath() + 
-					File.separator + Cfg.getUserName() + Cfg.getFeaSuf());
+			File fileMfcc = new File(Cfg.getInstance().getRootDir() + Cfg.getInstance().getTmpPath() + 
+					File.separator + Cfg.getInstance().getUserName() + Cfg.getInstance().getFeaSuf());
 			if (fileMfcc.exists()) {
 				fileMfcc.delete();
 			}
@@ -249,13 +249,13 @@ public class TrainActivity extends Activity {
 			
 			
 			this.publishProgress("正在训练模型...");
-			Recognition.TrainGmm(Cfg.getRootDir() + Cfg.getWorldMdlPath() + File.separator,
-					Cfg.getRootDir() + Cfg.getTmpPath() + File.separator,
-					Cfg.getRootDir() + Cfg.getTmpPath() + File.separator,
-					Cfg.getUserName());
-			String tmpPath = Cfg.getRootDir() + Cfg.getTmpPath() + File.separator;
-			FileAccess.Move(tmpPath + Cfg.getUserName() + Cfg.getFeaSuf(), Cfg.getRootDir() + Cfg.getUserName() + File.separator);
-			FileAccess.Move(tmpPath + Cfg.getUserName() + Cfg.getMdlSuf(), Cfg.getRootDir() + Cfg.getUserName() + File.separator);
+			Recognition.TrainGmm(Cfg.getInstance().getRootDir() + Cfg.getInstance().getWorldMdlPath() + File.separator,
+					Cfg.getInstance().getRootDir() + Cfg.getInstance().getTmpPath() + File.separator,
+					Cfg.getInstance().getRootDir() + Cfg.getInstance().getTmpPath() + File.separator,
+					Cfg.getInstance().getUserName());
+			String tmpPath = Cfg.getInstance().getRootDir() + Cfg.getInstance().getTmpPath() + File.separator;
+			FileAccess.Move(tmpPath + Cfg.getInstance().getUserName() + Cfg.getInstance().getFeaSuf(), Cfg.getInstance().getRootDir() + Cfg.getInstance().getUserName() + File.separator);
+			FileAccess.Move(tmpPath + Cfg.getInstance().getUserName() + Cfg.getInstance().getMdlSuf(), Cfg.getInstance().getRootDir() + Cfg.getInstance().getUserName() + File.separator);
 			
 			return "训练完成";
 		}

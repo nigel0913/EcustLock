@@ -1,8 +1,10 @@
 package com.nigel.ecustlock;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.support.Cfg;
 import com.support.SqlOpenHelper;
 
 import android.app.Activity;
@@ -89,6 +91,11 @@ public class UsersActivity extends Activity {
 		
 		if (res == 0)
 			return false;
+		
+		File userDir =new File(Cfg.getInstance().getRootDir() + name + File.separator);
+		if (userDir.exists()) {
+			userDir.delete();
+		}
 		
 		return true;
 	}

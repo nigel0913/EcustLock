@@ -67,14 +67,6 @@ public class LoginActivity extends Activity {
 	}
 	
 	public void Init() {
-//		SharedPreferences sharedPref = getSharedPreferences(getString(R.string.s_settingsPreferences), Context.MODE_PRIVATE);
-//		String key = getString(R.string.s_settingsPasswordKey);
-//		// set default password = 0000
-//		if (!sharedPref.contains(key)) {
-//			SharedPreferences.Editor editor = sharedPref.edit();
-//			editor.putString(key, "0000");
-//			editor.commit();
-//		}
 		boolean sdcardExists = false;
 		if (sdcardExists = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
 			String rootDir = Environment.getExternalStorageDirectory().toString() + File.separator + this.recDir + File.separator;
@@ -83,7 +75,7 @@ public class LoginActivity extends Activity {
 				this.innovationSaveFileDir.mkdirs();
 			}
 			
-			Cfg.setRootDir(rootDir);
+			Cfg.getInstance().setRootDir(rootDir);
 			InitFiles();
 		}
 	}
@@ -94,17 +86,6 @@ public class LoginActivity extends Activity {
 		public void onClick(View v) {
 			String username = evUsername.getText().toString();
 			String password = evPassword.getText().toString();
-			
-			// TODO need delete
-//			if (true) {
-//				Log.v(LOG_TAG, "in");
-//				Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-//				// TODO modify user_name tags
-//				intent.putExtra("user_name", username);
-//				LoginActivity.this.startActivity(intent);
-//				finish();
-//			}
-			
 			
 			if (username.equals("")) {
 				Toast.makeText(LoginActivity.this, "用户名不能为空", Toast.LENGTH_SHORT).show();
@@ -147,20 +128,20 @@ public class LoginActivity extends Activity {
 	}
 	
 	/**
-	 * 初始化文件列表
+	 * 初始化系统文件结构
 	 */
 	private void InitFiles() {
 		File fDir = null;
-		for (String dirName : Cfg.getDirLists()) {
-			fDir = new File(Cfg.getRootDir() + File.separator + dirName + File.separator);
+		for (String dirName : Cfg.getInstance().getDirLists()) {
+			fDir = new File(Cfg.getInstance().getRootDir() + File.separator + dirName + File.separator);
 			if ( !fDir.exists() ) {
 				fDir.mkdirs();
 			}
 		}
 		
-		File worldModel = new File(Cfg.getRootDir() + File.separator + Cfg.getWorldMdlPath() + File.separator + Cfg.getWorldMdlFile());
+		File worldModel = new File(Cfg.getInstance().getRootDir() + File.separator + Cfg.getInstance().getWorldMdlPath() + File.separator + Cfg.getInstance().getWorldMdlFile());
 		if ( !worldModel.exists() ) {
-			copyAssets(Cfg.getWorldMdlFile(), Cfg.getRootDir() + File.separator + Cfg.getWorldMdlPath());
+			copyAssets(Cfg.getInstance().getWorldMdlFile(), Cfg.getInstance().getRootDir() + File.separator + Cfg.getInstance().getWorldMdlPath());
 		}
 	}
 	
