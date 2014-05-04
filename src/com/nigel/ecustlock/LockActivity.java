@@ -233,10 +233,11 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 			Log.v(async_tag, "doInBackground");
 			this.publishProgress(0);
 
+			String rootDir = Cfg.getInstance().getRootDir();
 			short[] audioData = new short[bufferSizeInBytes+1];
 			int readsize = 0;
 
-			File file = new File(Cfg.getInstance().getRootDir() + Cfg.getInstance().getTmpPath()
+			File file = new File(rootDir + Cfg.getInstance().getTmpPath()
 					+ File.separator + Cfg.getInstance().getUserName() + Cfg.getInstance().getFeaSuf());
 			if (file.exists()) {
 				file.delete();
@@ -265,11 +266,11 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 			this.publishProgress(1);
 
 			// recognize
-			String tmpPath = Cfg.getInstance().getRootDir() + Cfg.getInstance().getTmpPath() + File.separator;
+			String tmpPath = rootDir + Cfg.getInstance().getTmpPath() + File.separator;
 			Log.d("Test", "start: tmpPath=" + tmpPath);
-			score = Recognition.Test(Cfg.getInstance().getRootDir() + Cfg.getInstance().getWorldMdlPath() + File.separator,
-					Cfg.getInstance().getRootDir() + Cfg.getInstance().getTmpPath() + File.separator,
-					Cfg.getInstance().getRootDir() + Cfg.getInstance().getUserName() + File.separator,
+			score = Recognition.Test(rootDir + Cfg.getInstance().getWorldMdlPath() + File.separator,
+					rootDir + Cfg.getInstance().getTmpPath() + File.separator,
+					rootDir + Cfg.getInstance().getUsersPath() + File.separator + Cfg.getInstance().getUserName() + File.separator,
 					Cfg.getInstance().getUserName());
 			Log.d("recognize result", ""+score);
 			return result;

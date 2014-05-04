@@ -19,6 +19,7 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.AsyncTask.Status;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -56,7 +57,8 @@ public class TrainActivity extends Activity {
 		this.btnTest = (Button) super.findViewById(R.id.btn_test);
 		
 		this.btnTrain.setOnClickListener(new TrainOnClickListenserImpl());
-		this.btnTest.setOnClickListener(new TrainOnClickListenserImpl());
+//		this.btnTest.setOnClickListener(null);
+		this.btnTest.setEnabled(false);
 		
 		bufferSizeInBytes = AudioRecord.getMinBufferSize(sampleRateInHz,
 				channelConfig, audioFormat);
@@ -71,12 +73,21 @@ public class TrainActivity extends Activity {
 	}
 
 	@Override
+	protected void onStart() {
+		super.onStart();
+		if (mfccTask != null && mfccTask.getStatus() == AsyncTask.Status.RUNNING) {
+			this.btnTrain.setEnabled(false);
+			this.tvInfo.setText("正在训练中");
+		}
+	}
+	
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
-
+	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 //		Log.i(ac_tag, "");
@@ -89,7 +100,8 @@ public class TrainActivity extends Activity {
 				audioRecord = null;
 			}
 			
-			if (mfccTask != null) {
+			if (mfccTask != null && mfccTask.getStatus() == AsyncTask.Status.RUNNING) {
+				Log.d("onKeyDown", "mfccTask.cancel(true)");
 				mfccTask.cancel(true);
 			}
 			
@@ -128,6 +140,7 @@ public class TrainActivity extends Activity {
 						} 
 						else {
 							btnTrain.setText("结束录音");
+							btnTrain.setEnabled(false);
 							if (audioRecord == null) {
 								audioRecord = new AudioRecord(audioSource, sampleRateInHz,
 										channelConfig, audioFormat, bufferSizeInBytes);
@@ -135,6 +148,11 @@ public class TrainActivity extends Activity {
 							audioRecord.startRecording();
 							isRecording = true;
 							Log.d("isRecording", ""+isRecording);
+							
+							if (mfccTask != null && mfccTask.getStatus() == AsyncTask.Status.RUNNING) {
+								mfccTask.cancel(true);
+								mfccTask = null;
+							}
 							mfccTask = new MfccTask();
 							mfccTask.execute();
 						}
@@ -200,6 +218,10 @@ public class TrainActivity extends Activity {
 
 		@Override
 		protected String doInBackground(Void... progress) {
+			
+			String rootDir = Cfg.getInstance().getRootDir();
+			String username = Cfg.getInstance().getUserName();
+			
 			this.publishProgress("正在录音...");
 			
 			short[] audioData = new short[bufferSizeInBytes];
@@ -244,29 +266,39 @@ public class TrainActivity extends Activity {
 			writer.close();
 			
 			if (isCancelled()) {
-				return "被取消";
+				Log.d("MfccTask", "isCanceled()1");
+				return null;
 			}
 			
-			
 			this.publishProgress("正在训练模型...");
-			Recognition.TrainGmm(Cfg.getInstance().getRootDir() + Cfg.getInstance().getWorldMdlPath() + File.separator,
-					Cfg.getInstance().getRootDir() + Cfg.getInstance().getTmpPath() + File.separator,
-					Cfg.getInstance().getRootDir() + Cfg.getInstance().getTmpPath() + File.separator,
+			Recognition.TrainGmm(rootDir + Cfg.getInstance().getWorldMdlPath() + File.separator,
+					rootDir + Cfg.getInstance().getTmpPath() + File.separator,
+					rootDir + Cfg.getInstance().getTmpPath() + File.separator,
 					Cfg.getInstance().getUserName());
-			String tmpPath = Cfg.getInstance().getRootDir() + Cfg.getInstance().getTmpPath() + File.separator;
-			FileAccess.Move(tmpPath + Cfg.getInstance().getUserName() + Cfg.getInstance().getFeaSuf(), Cfg.getInstance().getRootDir() + Cfg.getInstance().getUserName() + File.separator);
-			FileAccess.Move(tmpPath + Cfg.getInstance().getUserName() + Cfg.getInstance().getMdlSuf(), Cfg.getInstance().getRootDir() + Cfg.getInstance().getUserName() + File.separator);
+			String tmpPath = rootDir + Cfg.getInstance().getTmpPath() + File.separator;
+			FileAccess.Move(tmpPath + username + Cfg.getInstance().getFeaSuf(), rootDir + Cfg.getInstance().getUsersPath() + File.separator + username + File.separator);
+			FileAccess.Move(tmpPath + username + Cfg.getInstance().getMdlSuf(), rootDir + Cfg.getInstance().getUsersPath() + File.separator + username + File.separator);
 			
+			if (isCancelled()) {
+				Log.d("MfccTask", "isCanceled()2");
+				return null;
+			}
+						
 			return "训练完成";
 		}
 		
 		@Override
 		protected void onProgressUpdate(String... values) {
 			if (values[0].equals("正在录音..."))
-				TrainActivity.this.btnTest.setEnabled(false);
+				TrainActivity.this.btnTrain.setEnabled(true);
 			if (values[0].equals("正在训练模型...")) {
 				TrainActivity.this.btnTrain.setEnabled(false);
-				TrainActivity.this.btnTest.setEnabled(true);
+//				TrainActivity.this.btnTest.setEnabled(true);
+			}
+			if (isCancelled()) {
+				TrainActivity.this.btnTrain.setEnabled(true);
+				TrainActivity.this.tvInfo.setText("被取消");
+				return ;
 			}
 			TrainActivity.this.tvInfo.setText(values[0]);
 			super.onProgressUpdate(values);

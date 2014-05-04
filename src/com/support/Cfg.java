@@ -1,15 +1,26 @@
 package com.support;
 
 public class Cfg {
-	
+	/**
+	 * File structure
+	 * ./-
+	 * 	 |-tmp
+	 * 	 |-users-
+	 * 			 |-userlist...
+	 * 	 |-world
+	 */
 	String rootDir = ".";
-	String dirLists[] = {"admin", "world", "tmp", "users"};
+	String dirLists[] = {"world", "tmp", "users"};
 	
 	String tmpPath = "tmp";
 	String worldMdlPath = "world";
 	String adminPath = "admin";
 	String usersPath = "users";
 	String worldMdlFile = "WorldModel.mdl";
+	
+	String userName = "admin";
+	String feaSuf = ".mfcc";
+	String mdlSuf = ".mdl";
 	
 	static Cfg Instance = new Cfg();
 	public static Cfg getInstance() {
@@ -77,9 +88,5 @@ public class Cfg {
 	public void setMdlSuf(String mdlSuf) {
 		this.mdlSuf = mdlSuf;
 	}
-	String userName = "admin";
-	String feaSuf = ".mfcc";
-	String mdlSuf = ".mdl";
-	
 	
 }

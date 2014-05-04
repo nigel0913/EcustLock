@@ -17,25 +17,12 @@
         android:layout_alignParentTop="true"
         android:text="上次训练者为" />
     
-    <EditText
-        android:id="@+id/et_new_trainer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/tv_description"
-        android:ems="10"
-        android:focusable="false"
-        android:hint="请输入新训练者"
-        android:inputType="textPersonName" >
-
-    </EditText>
-    
     <Button
         android:id="@+id/btn_train"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/et_new_trainer"
+        android:layout_below="@+id/tv_description"
         android:text="@string/train" />
 
     <TextView
@@ -54,6 +41,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/tv_info"
+        android:clickable="false"
         android:text="GetMfcc" />
 
 </RelativeLayout>
