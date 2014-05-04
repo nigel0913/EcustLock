@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.support.Cfg;
+import com.support.FileAccess;
 import com.support.SqlOpenHelper;
 
 import android.app.Activity;
@@ -92,9 +93,10 @@ public class UsersActivity extends Activity {
 		if (res == 0)
 			return false;
 		
-		File userDir =new File(Cfg.getInstance().getRootDir() + name + File.separator);
+		File userDir =new File(Cfg.getInstance().getRootDir() + Cfg.getInstance().getUsersPath() + 
+				File.separator + name + File.separator);
 		if (userDir.exists()) {
-			userDir.delete();
+			FileAccess.deleteDirectory(userDir);
 		}
 		
 		return true;
