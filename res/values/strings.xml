@@ -26,6 +26,8 @@
     <string name="add_user">添加用户</string>
     <string name="delete_user">删除用户</string>
     <string name="register">注册</string>
+    <string name="result_score">得分结果</string>
+    <string name="avatar">头像</string>
     
 
 </resources>

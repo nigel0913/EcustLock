@@ -51,9 +51,10 @@
         android:id="@+id/tProgress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
         android:text="@string/default_time"
-        android:textSize="16sp"
         android:textColor="#fff"
-        android:layout_gravity="center_horizontal" />
+        android:textSize="16sp"
+        android:visibility="invisible" />
 
 </LinearLayout>

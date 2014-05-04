@@ -13,7 +13,7 @@
         android:layout_alignParentTop="true" >
 
         <TextView
-            android:id="@+id/textView1"
+            android:id="@+id/score_title"
             android:layout_width="64dp"
             android:layout_height="48dp"
             android:layout_alignParentLeft="true"
@@ -26,10 +26,10 @@
             android:id="@+id/reg_username"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/textView1"
+            android:layout_alignBaseline="@+id/score_title"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:layout_toRightOf="@+id/textView1"
+            android:layout_toRightOf="@+id/score_title"
             android:layout_weight="1"
             android:ems="10"
             android:inputType="textPersonName" >

@@ -23,6 +23,16 @@ public class LockService extends Service {
 	
 	private final static String PREF_IS_RUNNING = "ServiceRunning";
 	
+	public enum Status {
+		STOP, RUNNING
+	}
+	
+	private static Status status = Status.STOP;
+	
+	public static Status getStatus() {
+		return status;
+	}
+
 	@Override
 	public IBinder onBind(Intent arg0) {
 		return null;
@@ -39,7 +49,7 @@ public class LockService extends Service {
 		// use startForeground(), this format will prevent successfully and won't show notification
 		// this can use settings and let user decide which format (whether show the notification)
 		startForeground(1, new Notification());
-		
+		status = Status.RUNNING;
 		Toast.makeText(getApplicationContext(), "声音认证服务已经启动", Toast.LENGTH_SHORT).show();
 	}
 	
@@ -59,6 +69,7 @@ public class LockService extends Service {
 		setRunning(false);
 		unregisterReceiver(receiverOff);
 		stopForeground(true);
+		status = Status.STOP;
 		Toast.makeText(getApplicationContext(), "声音认证服务已经关闭", Toast.LENGTH_SHORT).show();
 	}
 	

@@ -10,9 +10,12 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
 
-    <RelativeLayout 
+    <RelativeLayout
+        android:id="@+id/switch_layout"
         android:layout_width="match_parent"
-        android:layout_height="48dp">
+        android:layout_height="48dp"
+        android:visibility="gone" >
+
 	    <Switch
 	        android:id="@+id/service_switch"
 	        android:layout_width="match_parent"
@@ -33,7 +36,8 @@
         android:id="@+id/btn_mfcctest"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="MfccTest" />
+        android:text="MfccTest"
+        android:visibility="gone" />
     
     <Button 
         android:id="@+id/btn_open_train"
@@ -51,6 +55,7 @@
         android:id="@+id/btn_user_manager"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/user_manager" />
+        android:text="@string/user_manager"
+        android:visibility="gone" />
 
 </LinearLayout>

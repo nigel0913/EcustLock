@@ -19,6 +19,7 @@ import android.widget.Switch;
 
 public class MainActivity extends Activity implements OnClickListener {
 
+	View switchLayout = null;
 	Switch toggleService = null;
 	Button btnModifyPwd = null;
 	Button btnOpenTrain = null;
@@ -37,6 +38,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		
 		Log.v(life_tag, "onCreate");
 		
+		this.switchLayout = (View) super.findViewById(R.id.switch_layout);
 		this.toggleService = (Switch) super.findViewById(R.id.service_switch);
 		this.btnModifyPwd = (Button) super.findViewById(R.id.btn_modify_passwd);
 		this.btnOpenTrain = (Button) super.findViewById(R.id.btn_open_train);
@@ -52,21 +54,22 @@ public class MainActivity extends Activity implements OnClickListener {
 		
 		Intent intent = getIntent();
 		String userName = intent.getStringExtra("user_name");
-		if ( !userName.equals("admin") ) {
-			this.btnUserManager.setVisibility(View.GONE);
-			this.toggleService.setVisibility(View.GONE);
-			Cfg.getInstance().setUserName(userName);
-		}
-		else {
+		if ( userName.equals("admin") ) {
+			this.btnUserManager.setVisibility(View.VISIBLE);
+			this.switchLayout.setVisibility(View.VISIBLE);
 			this.btnUserManager.setOnClickListener(this);
-			Cfg.getInstance().setUserName(userName);
-			if (LockService.isRunning(getApplicationContext())) {
+//			if (LockService.isRunning(getApplicationContext())) {
+			if (LockService.getStatus() == LockService.Status.RUNNING) {
 				this.toggleService.setChecked(true);
 			}
 			else {
 				this.toggleService.setChecked(false);
 			}
 			this.toggleService.setOnCheckedChangeListener( new StartServiceOnCheckedChangeListenerImpl() );
+			Cfg.getInstance().setUserName(userName);
+		}
+		else {
+			Cfg.getInstance().setUserName(userName);
 		}
 		
 		userCheck();
