@@ -48,7 +48,6 @@ public class ResultDialog extends DialogFragment {
 	    return builder.create();
 	}
 	
-	
 	public interface ResultDialogListener {
 		public void onDialogPositiveClick(DialogFragment dialog);
         public void onDialogNegativeClick(DialogFragment dialog);

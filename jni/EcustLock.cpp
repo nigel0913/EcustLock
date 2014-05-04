@@ -10,21 +10,13 @@
 #include "string.h"
 #include "Config.h"
 
-#pragma comment(lib, "libalize_Linux_i686.a")
-#define pi 3.1415926
-#define MAX_N 1000005
-#define MAX_FILTER 35
-#define MAX_VEC 35
-#define MAX_FRM 1024
-
 #define MIN_COV 1e-200
-#define N 256
 
 using namespace alize;
 
 void trainGMM(Config config, char* worldPath, char* featurePath, char* modelPath, char* filename);
 void processMAP(const Mixture& world, Mixture& client, MixtureStat& clientStat);
-double test(Config config, char* worldPath, char* testFeaturePath, char* modelPath, char* filename);
+double test(Config config, char* worldPath, char* testFeaturePath, char* modelPath, char* feaFile, char* mdlFile);
 
 /*
  * Class:     com_support_Recognition
@@ -37,7 +29,6 @@ JNIEXPORT void JNICALL Java_com_support_Recognition_jniTrainGmm(JNIEnv * env, jc
     char* feaPath = (char*) env->GetStringUTFChars(jFeaPath, 0);
     char* mdlPath = (char*) env->GetStringUTFChars(jMdlPath, 0);
     char* filename = (char*) env->GetStringUTFChars(jFilename, 0);
-
 
 	char vectSize[10], distribCount[10];
 	strcpy(vectSize, "26");
@@ -70,12 +61,14 @@ JNIEXPORT void JNICALL Java_com_support_Recognition_jniTrainGmm(JNIEnv * env, jc
  * Method:    jniTest
  * Signature: (Ljava/lang/String;Ljava/lang/String;)D
  */
-JNIEXPORT jdouble JNICALL Java_com_support_Recognition_jniTest(JNIEnv * env, jclass j, jstring jWorldPath, jstring jFeaPath, jstring jMdlPath, jstring jFilename)
+JNIEXPORT jdouble JNICALL Java_com_support_Recognition_jniTest
+	(JNIEnv * env, jclass j, jstring jWorldPath, jstring jFeaPath, jstring jMdlPath, jstring jFeaFile, jstring jMdlFile)
 {
     char* worldPath = (char*) env->GetStringUTFChars(jWorldPath, 0);
     char* feaPath = (char*) env->GetStringUTFChars(jFeaPath, 0);
     char* mdlPath = (char*) env->GetStringUTFChars(jMdlPath, 0);
-    char* filename = (char*) env->GetStringUTFChars(jFilename, 0);
+    char* feaFile = (char*) env->GetStringUTFChars(jFeaFile, 0);
+    char* mdlFile = (char*) env->GetStringUTFChars(jMdlFile, 0);
 
 	char vectSize[10], distribCount[10];
 	strcpy(vectSize, "26");
@@ -87,7 +80,6 @@ JNIEXPORT jdouble JNICALL Java_com_support_Recognition_jniTest(JNIEnv * env, jcl
 	config.setParam("loadFeatureFileExtension", ".mfcc");
 	config.setParam("loadFeatureFileVectSize", vectSize);
 	config.setParam("featureServerMemAlloc", "100000");
-
 
 	config.setParam("vectSize",vectSize);
 	config.setParam("mixtureDistribCount", distribCount);
@@ -101,7 +93,7 @@ JNIEXPORT jdouble JNICALL Java_com_support_Recognition_jniTest(JNIEnv * env, jcl
 	config.setParam("maxLLK", "100");
 	config.setParam("distribType", "GD");
 
-	return test(config, worldPath, feaPath, mdlPath, filename);
+	return test(config, worldPath, feaPath, mdlPath, feaFile, mdlFile);
 }
 
 void trainGMM(Config config, char* worldPath, char* featurePath, char* modelPath, char* filename)
@@ -209,7 +201,7 @@ void processMAP(const Mixture& world, Mixture& client, MixtureStat& clientStat)
 		client.getTabWeight()[c] = client.getTabWeight()[c] / newTotOcc;
 }
 
-double test(Config config, char* worldPath, char* testFeaturePath, char* modelPath, char* filename)
+double test(Config config, char* worldPath, char* testFeaturePath, char* modelPath, char* feaFile, char* mdlFile)
 {
 	double worldScore = 0;
 	double clientScore = 0;
@@ -221,10 +213,10 @@ double test(Config config, char* worldPath, char* testFeaturePath, char* modelPa
 	config.setParam("mixtureFilesPath", modelPath);
 	config.setParam("featureFilesPath", testFeaturePath);
 	Feature f;
-	ms.loadMixtureGD(filename);
+	ms.loadMixtureGD(mdlFile);
 
 	int distribCount = ms.getMixtureCount();
-	FeatureServer fs(config, filename);
+	FeatureServer fs(config, feaFile);
 
 	for(int dc = 0; dc < distribCount; dc++)
 	{

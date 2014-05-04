@@ -50,8 +50,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		this.btnOpenTrain.setOnClickListener(this);
 		this.btnConfig.setOnClickListener(this);
 		this.btnMfccTest.setOnClickListener(this);
-		
-		
+
 		Intent intent = getIntent();
 		String userName = intent.getStringExtra("user_name");
 		if ( userName.equals("admin") ) {

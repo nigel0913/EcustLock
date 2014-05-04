@@ -4,12 +4,16 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
 
 import com.nigel.ecustlock.ResultDialog.ResultDialogListener;
 import com.support.Cfg;
 import com.support.GetMfcc;
 import com.support.Recognition;
+import com.support.SqlOpenHelper;
 import com.support.Test;
 import com.support.mfcc.Mfcc;
 
@@ -18,6 +22,8 @@ import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -43,7 +49,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class LockActivity extends FragmentActivity implements ResultDialog.ResultDialogListener {
+public class LockActivity extends FragmentActivity implements ScoreDialog.ScoreDialogListener {
 
 	TextView timeView = null;
 	TextView dateView = null;
@@ -62,7 +68,8 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 	
 	static String[] statusString = { "正在录音...", "正在识别..."};
 
-	double score = -1;
+	HashMap<String, Float> mapScore = new HashMap<String, Float>();
+	float score = -1;
 	int audioSource = MediaRecorder.AudioSource.MIC;
 	int sampleRateInHz = 8000;
 	int channelConfig = AudioFormat.CHANNEL_IN_MONO;
@@ -71,6 +78,8 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 	boolean isRecording = false;
 	AudioRecord audioRecord = null;
 	AuthenTask ATask = null;
+	
+	SQLiteDatabase database = null;
 
 	String ac_tag = "LockActivity life";
 	String async_tag = "AuthenAsyncTask life";
@@ -108,6 +117,9 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 				channelConfig, audioFormat);
 		audioRecord = new AudioRecord(audioSource, sampleRateInHz,
 				channelConfig, audioFormat, bufferSizeInBytes);
+		
+		SqlOpenHelper helper = new SqlOpenHelper(getApplicationContext());
+		database = helper.getReadableDatabase();
 
 	}
 
@@ -171,6 +183,7 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 	
 	@Override
 	protected void onStop() {
+		super.onStop();
 		Log.v(ac_tag, "onStop");
 		if (ATask != null) {
 			ATask.cancel(true);
@@ -181,12 +194,13 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 				audioRecord.stop();
 			}
 		}
-		super.onStop();
 	}
 	
 	@Override
 	protected void onDestroy() {
+		super.onDestroy();
 		
+		database.close();
 		if (audioRecord != null) {
 			if (audioRecord.getRecordingState() != AudioRecord.RECORDSTATE_RECORDING) {
 				audioRecord.stop();
@@ -195,7 +209,6 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 			audioRecord = null;
 		}
 		
-		super.onDestroy();
 	}
 
 	@Override
@@ -238,7 +251,7 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 			int readsize = 0;
 
 			File file = new File(rootDir + Cfg.getInstance().getTmpPath()
-					+ File.separator + Cfg.getInstance().getUserName() + Cfg.getInstance().getFeaSuf());
+					+ File.separator + "tmp" + Cfg.getInstance().getFeaSuf());
 			if (file.exists()) {
 				file.delete();
 			}
@@ -265,13 +278,35 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 			
 			this.publishProgress(1);
 
+			mapScore.clear();
+			String[] columns = {SqlOpenHelper.USER_NAME};
+			List<String> namelist = new ArrayList<String>();
+			Cursor cursor = database.query(SqlOpenHelper.TABLE_USERINFO, columns, null, null, null, null, null);
+			cursor.moveToFirst();
+			while (!cursor.isAfterLast()) {
+				String name = cursor.getString(0);
+				namelist.add(name);
+				cursor.moveToNext();
+			}
 			// recognize
 			String tmpPath = rootDir + Cfg.getInstance().getTmpPath() + File.separator;
 			Log.d("Test", "start: tmpPath=" + tmpPath);
-			score = Recognition.Test(rootDir + Cfg.getInstance().getWorldMdlPath() + File.separator,
-					rootDir + Cfg.getInstance().getTmpPath() + File.separator,
-					rootDir + Cfg.getInstance().getUsersPath() + File.separator + Cfg.getInstance().getUserName() + File.separator,
-					Cfg.getInstance().getUserName());
+			for (String username : namelist) {
+				String userFileDir = rootDir + Cfg.getInstance().getUsersPath() + File.separator
+						+ username + File.separator;
+				File featrue = new File(userFileDir + username + Cfg.getInstance().getFeaSuf());
+				File model = new File(userFileDir + username + Cfg.getInstance().getMdlSuf());
+				if ( featrue.exists() && model.exists() ) {
+					float tmpscore = (float) Recognition.Test(rootDir + Cfg.getInstance().getWorldMdlPath() + File.separator,
+							rootDir + Cfg.getInstance().getTmpPath() + File.separator,
+							rootDir + Cfg.getInstance().getUsersPath() + File.separator + username + File.separator,
+							"tmp",
+							username);
+					
+					mapScore.put(username, tmpscore);
+				}
+				
+			}
 			Log.d("recognize result", ""+score);
 			return result;
 		}
@@ -378,31 +413,56 @@ public class LockActivity extends FragmentActivity implements ResultDialog.Resul
 	}
 
 	public void showResultDialog() {
-		DialogFragment dialog = new ResultDialog();
-		dialog.show(getSupportFragmentManager(), "result");
+		DialogFragment dialog = new ScoreDialog();
+		dialog.show(getSupportFragmentManager(), "score");
 	}
-	
+//	
+//	@Override
+//	public void onDialogPositiveClick(DialogFragment dialog) {
+//		Toast.makeText(getApplicationContext(), "识别正确", Toast.LENGTH_SHORT).show();
+//		LockActivity.this.finish();
+//	}
+//
+//	@Override
+//	public void onDialogNegativeClick(DialogFragment dialog) {
+//		Toast.makeText(getApplicationContext(), "识别错误", Toast.LENGTH_SHORT).show();
+//		LockActivity.this.finish();
+//	}
+//
+//	@Override
+//	public void onSetScore() {
+//		ResultDialog dialog = (ResultDialog) getSupportFragmentManager().findFragmentByTag("result");
+//		if (dialog != null) {
+//			SharedPreferences sharedPref = getSharedPreferences(getString(R.string.s_settingsPreferences), Context.MODE_PRIVATE);
+//			String key = getString(R.string.s_settingsThreshold);
+//			float threshold = sharedPref.getFloat(key, -50);
+//			dialog.UpdateScoreView(score, threshold, "admin");
+//		}
+//	}
+
 	@Override
-	public void onDialogPositiveClick(DialogFragment dialog) {
-		Toast.makeText(getApplicationContext(), "识别正确", Toast.LENGTH_SHORT).show();
+	public void onSetThreshold(DialogFragment dialog) {
+		ScoreDialog dlg = (ScoreDialog) dialog;
+		SharedPreferences sharedPref = getSharedPreferences(getString(R.string.s_settingsPreferences), Context.MODE_PRIVATE);
+		String key = getString(R.string.s_settingsThreshold);
+		float threshold = sharedPref.getFloat(key, -50);
+		dlg.setThreshold(threshold);
+	}
+
+	@Override
+	public void onSetScoreList(DialogFragment dialog) {
+		ScoreDialog dlg = (ScoreDialog) dialog;
+		dlg.setScoreList(mapScore);
+	}
+
+	@Override
+	public void onFinish() {
 		LockActivity.this.finish();
 	}
 
 	@Override
 	public void onDialogNegativeClick(DialogFragment dialog) {
-		Toast.makeText(getApplicationContext(), "识别错误", Toast.LENGTH_SHORT).show();
 		LockActivity.this.finish();
-	}
-
-	@Override
-	public void onSetScore() {
-		ResultDialog dialog = (ResultDialog) getSupportFragmentManager().findFragmentByTag("result");
-		if (dialog != null) {
-			SharedPreferences sharedPref = getSharedPreferences(getString(R.string.s_settingsPreferences), Context.MODE_PRIVATE);
-			String key = getString(R.string.s_settingsThreshold);
-			float threshold = sharedPref.getFloat(key, -50);
-			dialog.UpdateScoreView(score, threshold, "admin");
-		}
 	}
 
 }

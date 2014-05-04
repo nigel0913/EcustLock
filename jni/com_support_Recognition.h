@@ -18,10 +18,10 @@ JNIEXPORT void JNICALL Java_com_support_Recognition_jniTrainGmm
 /*
  * Class:     com_support_Recognition
  * Method:    jniTest
- * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)D
+ * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)D
  */
 JNIEXPORT jdouble JNICALL Java_com_support_Recognition_jniTest
-  (JNIEnv *, jclass, jstring, jstring, jstring, jstring);
+  (JNIEnv *, jclass, jstring, jstring, jstring, jstring, jstring);
 
 #ifdef __cplusplus
 }

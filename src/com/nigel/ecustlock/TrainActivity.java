@@ -27,6 +27,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class TrainActivity extends Activity {
 
@@ -309,6 +310,8 @@ public class TrainActivity extends Activity {
 			TrainActivity.this.btnTrain.setEnabled(true);
 			TrainActivity.this.tvInfo.setText(result);
 			super.onPostExecute(result);
+			Toast.makeText(getApplicationContext(), "ÑµÁ·³É¹¦", Toast.LENGTH_SHORT).show();
+			TrainActivity.this.finish();
 		}
 		
 	}
