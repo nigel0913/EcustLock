@@ -11,6 +11,7 @@ import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class ConfigActivity extends Activity {
 	
@@ -86,7 +87,7 @@ public class ConfigActivity extends Activity {
 					SharedPreferences.Editor editor = sharedPref.edit();
 					editor.putFloat(key, threshold);
 					editor.commit();
-//					Toast.makeText(getApplicationContext(), "保存成功", Toast.LENGTH_SHORT);
+					Toast.makeText(getApplicationContext(), "保存成功", Toast.LENGTH_SHORT).show();
 					break;
 				default:
 					break;
