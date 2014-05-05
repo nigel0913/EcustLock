@@ -13,6 +13,7 @@ import com.support.GetMfcc;
 import com.support.Recognition;
 import com.support.mfcc.Mfcc;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
@@ -60,6 +61,9 @@ public class TrainActivity extends Activity {
 		this.btnTrain.setOnClickListener(new TrainOnClickListenserImpl());
 //		this.btnTest.setOnClickListener(null);
 		this.btnTest.setEnabled(false);
+		
+		ActionBar actionBar = getActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
 		
 		bufferSizeInBytes = AudioRecord.getMinBufferSize(sampleRateInHz,
 				channelConfig, audioFormat);

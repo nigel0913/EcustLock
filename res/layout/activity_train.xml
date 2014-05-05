@@ -9,35 +9,6 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin" >
 
-    <TextView
-        android:id="@+id/tv_description"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/tv_info"
-        android:layout_alignParentTop="true"
-        android:text="@string/train_tips"
-        android:textColor="@android:color/secondary_text_dark"
-        android:textStyle="italic" />
-    
-    <Button
-        android:id="@+id/btn_train"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/tv_description"
-        android:text="@string/train" />
-
-    <TextView
-        android:id="@+id/tv_info"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/btn_train"
-        android:scrollbars="vertical"
-        android:singleLine="false"
-        android:text="@string/train_not_start"
-        android:textColor="@android:color/darker_gray" />
-
     <Button
         android:id="@+id/btn_test"
         android:layout_width="match_parent"
@@ -45,17 +16,48 @@
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/tv_info"
         android:clickable="false"
-        android:text="GetMfcc"
+        android:text="@string/no"
         android:visibility="gone" />
 
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/tv_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text="@string/train_tips"
+        android:textColor="@android:color/secondary_text_dark"
+        android:textStyle="italic" />
+
+    <TextView
+        android:id="@+id/tv_rec_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/tv_info"
-        android:layout_below="@+id/tv_info"
+        android:layout_above="@+id/tv_info"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/tv_description"
         android:lines="14"
         android:maxLines="20"
         android:text="@string/train_content" />
+    
+    <TextView
+        android:id="@+id/tv_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/btn_train"
+        android:layout_alignParentLeft="true"
+        android:scrollbars="vertical"
+        android:singleLine="false"
+        android:text="@string/train_not_start"
+        android:textColor="@android:color/darker_gray" />
 
+    <Button
+        android:id="@+id/btn_train"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:text="@string/train" />
+    
+    
 </RelativeLayout>

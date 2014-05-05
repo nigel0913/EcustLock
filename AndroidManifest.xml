@@ -57,8 +57,13 @@
 		
 		<activity
             android:name="com.nigel.ecustlock.TrainActivity"
-			android:label="@string/app_name"
-			android:launchMode="singleInstance" >
+			android:label="@string/train"
+			android:launchMode="singleInstance"
+			android:parentActivityName=".MainActivity" >
+            <!-- Parent activity meta-data to support API level 7+ -->
+	        <meta-data
+	            android:name="android.support.PARENT_ACTIVITY"
+	            android:value=".MainActivity" />
 		</activity>
 		<activity 
 		    android:name=".ConfigActivity"
