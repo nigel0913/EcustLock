@@ -8,6 +8,7 @@ import com.support.Cfg;
 import com.support.FileAccess;
 import com.support.SqlOpenHelper;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
@@ -34,6 +35,9 @@ public class UsersActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_user_manager);
 		users = new ArrayList<String>();
+		
+		ActionBar actionBar = getActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
 		
 		SqlOpenHelper helper = new SqlOpenHelper(getApplicationContext());
 		database = helper.getWritableDatabase();

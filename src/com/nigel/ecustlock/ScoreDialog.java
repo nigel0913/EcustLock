@@ -42,9 +42,9 @@ public class ScoreDialog extends DialogFragment implements OnItemClickListener {
 		tvThreshold = (TextView) ScoreView.findViewById(R.id.score_threshold);
 		scoreList = (ListView) ScoreView.findViewById(R.id.score_list);
 		
-		tvThreshold.setText("阈值为：" + this.threshold);
 		mListener.onSetThreshold(this);
 		mListener.onSetScoreList(this);
+		tvThreshold.setText("阈值为：" + this.threshold);
 		
 		String[] adapterKeys = {"name", "score"};
 		int[] adapterIds = {R.id.item_username, R.id.item_score};

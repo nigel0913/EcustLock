@@ -4,6 +4,7 @@ package com.nigel.ecustlock;
 import com.support.Cfg;
 import com.support.SqlOpenHelper;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
@@ -45,6 +46,9 @@ public class PasswordActivity extends Activity {
 		m_EditPwdOld = (EditText) this.findViewById(R.id.et_UM_old_pwd);
 		m_EditPwdNew = (EditText) this.findViewById(R.id.et_UM_new_pwd);
 		m_EditPwdComfirm = (EditText) this.findViewById(R.id.et_UM_comfirm_pwd);
+		
+		ActionBar actionBar = getActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
 		
 		SqlOpenHelper helper = new SqlOpenHelper(getApplicationContext());
 		database = helper.getWritableDatabase();

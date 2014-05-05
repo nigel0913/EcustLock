@@ -1,5 +1,6 @@
 package com.nigel.ecustlock;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -31,6 +32,9 @@ public class ConfigActivity extends Activity {
 		
 		btnSave = (Button) super.findViewById(R.id.btn_save);
 		btnSave.setOnClickListener(new SaveOnClickListener());
+		
+		ActionBar actionBar = getActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
 		
 		Init();
 	}

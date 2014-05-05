@@ -14,12 +14,13 @@
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
-           <!-- android:excludeFromRecents="true" --> 
+           <!-- android:excludeFromRecents="true" 
+        android:theme="@android:style/Theme.Holo.Light" > --> 
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@android:style/Theme.Holo.Light" >
+        android:theme="@style/AppTheme" >
         <activity
             android:name="com.nigel.ecustlock.LoginActivity"
             android:label="@string/app_name"
@@ -52,7 +53,11 @@
 		
 		<activity
             android:name="com.nigel.ecustlock.PasswordActivity"
-			android:label="@string/app_name" >
+			android:label="@string/modify_password"
+			android:parentActivityName=".MainActivity" >
+            <meta-data
+	            android:name="android.support.PARENT_ACTIVITY"
+	            android:value=".MainActivity" />
 		</activity>
 		
 		<activity
@@ -67,7 +72,11 @@
 		</activity>
 		<activity 
 		    android:name=".ConfigActivity"
-		    android:label="@string/app_name">
+		    android:label="@string/config_setting"
+		    android:parentActivityName=".MainActivity" >
+	        <meta-data
+	            android:name="android.support.PARENT_ACTIVITY"
+	            android:value=".MainActivity" />
 		</activity>    
 		<activity 
 		    android:name=".MfccTestActivity"
@@ -76,7 +85,11 @@
 		
 		<activity
 		    android:name=".UsersActivity"
-		    android:label="@string/app_name" >
+		    android:label="@string/user_manager"
+		    android:parentActivityName=".MainActivity" >
+	        <meta-data
+	            android:name="android.support.PARENT_ACTIVITY"
+	            android:value=".MainActivity" />
 		</activity>
 		
 		<activity
