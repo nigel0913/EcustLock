@@ -257,6 +257,7 @@ public class TrainActivity extends Activity {
 				if (AudioRecord.ERROR_INVALID_OPERATION != readsize
 						&& AudioRecord.ERROR_BAD_VALUE != readsize) {
 
+					Log.d("readsize", ""+readsize);
 					for (int i=0; i<readsize; i++){
 						inSamples[i+1] = audioData[i];
 						

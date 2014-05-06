@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import android.util.Log;
+
 public class Mfcc {
 
 	static int dim = 26;
@@ -103,8 +105,8 @@ public class Mfcc {
 		
 		int nhf = xlen / halfframe;
 		bufferSize = xlen - (nhf-5) * halfframe;
-		for (int i = (nhf-5) * halfframe + 1; i <= xlen; i++) {
-			buffer[i] = x[i];
+		for (int i = (nhf-5) * halfframe + 1, j = 1; i <= xlen; i++, j++) {
+			buffer[j] = x[i];
 		}
 		
 		double[][] ans = mfcc(x, xlen);
