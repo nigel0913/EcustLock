@@ -37,7 +37,7 @@ public class SqlOpenHelper extends SQLiteOpenHelper {
 		db.execSQL("create table " + TABLE_USERINFO + " ("
 				+ USER_ID + " integer primary key autoincrement not null,"
 				+ USER_NAME + " varchar(16),"
-				+ USER_NAME + " varchar(16),"
+				+ USER_PWD + " varchar(16),"
 				+ USER_TRAIN_TIME + " timestamp,"
 				+ USER_LOGIN_TIME + " timestamp"
 				+ ");");
