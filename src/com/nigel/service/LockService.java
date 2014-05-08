@@ -9,9 +9,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -20,8 +18,6 @@ public class LockService extends Service {
 	private final String LOG_TAG = "LocalService";
 	private BroadcastReceiver receiverOff;
 	private IntentFilter filterOff;
-	
-	private final static String PREF_IS_RUNNING = "ServiceRunning";
 	
 	public enum Status {
 		STOP, RUNNING
@@ -34,7 +30,7 @@ public class LockService extends Service {
 	}
 
 	@Override
-	public IBinder onBind(Intent arg0) {
+	public IBinder onBind(Intent intent) {
 		return null;
 	}
 	
@@ -43,7 +39,6 @@ public class LockService extends Service {
 		Log.v(LOG_TAG, "onCreate()");
 		super.onCreate();
 		registerIntentReceivers();
-		setRunning(true);
 		
 		// prevent service killed by other app
 		// use startForeground(), this format will prevent successfully and won't show notification
@@ -59,33 +54,18 @@ public class LockService extends Service {
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
 		return START_STICKY;
-//		return START_REDELIVER_INTENT;
 	}
 	
 	@Override
 	public void onDestroy() {
 		Log.v(LOG_TAG, "onDestroy()");
 		super.onDestroy();
-		setRunning(false);
 		unregisterReceiver(receiverOff);
 		stopForeground(true);
 		status = Status.STOP;
 		Toast.makeText(getApplicationContext(), "声音认证服务已经关闭", Toast.LENGTH_SHORT).show();
 	}
 	
-	private void setRunning(boolean running) {
-	    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-	    SharedPreferences.Editor editor = pref.edit();
-
-	    editor.putBoolean(PREF_IS_RUNNING, running);
-	    editor.apply();
-	}
-
-	public static boolean isRunning(Context ctx) {
-	    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ctx.getApplicationContext());
-	    return pref.getBoolean(PREF_IS_RUNNING, false);
-	}
-
 	private void registerIntentReceivers() {
 		Log.v(LOG_TAG, "registerIntentReceivers()");
 		filterOff = new IntentFilter(Intent.ACTION_SCREEN_OFF);

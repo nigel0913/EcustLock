@@ -7,20 +7,22 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import com.nigel.service.TrainService;
 import com.support.Cfg;
-import com.support.FileAccess;
 import com.support.GetMfcc;
-import com.support.Recognition;
 import com.support.mfcc.Mfcc;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.AsyncTask.Status;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -28,12 +30,10 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class TrainActivity extends Activity {
 
 	Button btnTrain = null;
-	Button btnTest = null;
 	TextView tvInfo = null;
 	
 	int audioSource = MediaRecorder.AudioSource.MIC;
@@ -45,6 +45,7 @@ public class TrainActivity extends Activity {
 	AudioRecord audioRecord = null;
 	
 	MfccTask mfccTask = null;
+	TrainBroadcastReceiver trainReceiver = new TrainBroadcastReceiver();
 
 	String ac_tag = "TrainActivity";
 	@Override
@@ -56,19 +57,13 @@ public class TrainActivity extends Activity {
 		
 		this.btnTrain = (Button) super.findViewById(R.id.btn_train);
 		this.tvInfo = (TextView) super.findViewById(R.id.tv_info);
-		this.btnTest = (Button) super.findViewById(R.id.btn_test);
 		
 		this.btnTrain.setOnClickListener(new TrainOnClickListenserImpl());
 //		this.btnTest.setOnClickListener(null);
-		this.btnTest.setEnabled(false);
 		
 		ActionBar actionBar = getActionBar();
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		
-		bufferSizeInBytes = AudioRecord.getMinBufferSize(sampleRateInHz,
-				channelConfig, audioFormat);
-		audioRecord = new AudioRecord(audioSource, sampleRateInHz,
-				channelConfig, audioFormat, bufferSizeInBytes);
 	}
 
 	@Override
@@ -78,11 +73,55 @@ public class TrainActivity extends Activity {
 	}
 
 	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(TrainService.ACTION_FINISH_TRAIN);
+		registerReceiver(trainReceiver, filter);
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		
+		unregisterReceiver(trainReceiver);
+	}
+	
+	@Override
 	protected void onStart() {
 		super.onStart();
+		
+		bufferSizeInBytes = AudioRecord.getMinBufferSize(sampleRateInHz,
+				channelConfig, audioFormat);
+		audioRecord = new AudioRecord(audioSource, sampleRateInHz,
+				channelConfig, audioFormat, bufferSizeInBytes);
+		isRecording = false;
+		
+		if (TrainService.getStatus() == TrainService.Status.TRAINING) {
+			String trainer = TrainService.getTrainer();
+			tvInfo.setText("正在训练" + trainer + "中");
+			btnTrain.setText("正在训练" + trainer + "中");
+			btnTrain.setEnabled(false);
+		}
+		else {
+			btnTrain.setText("开始录音");
+			btnTrain.setEnabled(true);
+		}
+	}
+	
+	@Override
+	protected void onStop() {
+		super.onStop();
+		
 		if (mfccTask != null && mfccTask.getStatus() == AsyncTask.Status.RUNNING) {
-			this.btnTrain.setEnabled(false);
-			this.tvInfo.setText("正在训练中");
+			mfccTask.cancel(true);
+		}
+		isRecording = false;
+		if (audioRecord != null) {
+			audioRecord.stop();
+			audioRecord.release();
+			audioRecord = null;
 		}
 	}
 	
@@ -98,22 +137,8 @@ public class TrainActivity extends Activity {
 //		Log.i(ac_tag, "");
 		switch (keyCode) {
 		case KeyEvent.KEYCODE_BACK:
-			isRecording = false;
-			if (audioRecord != null) {
-				audioRecord.stop();
-				audioRecord.release();
-				audioRecord = null;
-			}
-			
-			if (mfccTask != null && mfccTask.getStatus() == AsyncTask.Status.RUNNING) {
-				Log.d("onKeyDown", "mfccTask.cancel(true)");
-				mfccTask.cancel(true);
-			}
-			
 			return super.onKeyDown(keyCode, event);
 		case KeyEvent.KEYCODE_MENU:
-			isRecording = false;
-//			crossfade();
 			return super.onKeyDown(keyCode, event);
 		}
 		return super.onKeyDown(keyCode, event);
@@ -126,93 +151,39 @@ public class TrainActivity extends Activity {
 			int id = v.getId();
 			switch (id) {
 				case R.id.btn_train:
+					Log.d("TrainService status", ""+TrainService.getStatus());
 					if (isRecording == true) {
 						btnTrain.setText("开始录音");
-	
 						isRecording = false;
 						if (audioRecord != null) {
-							Log.v("release","release");
 							audioRecord.stop();
-							audioRecord.release();
-							audioRecord = null;
 						}
 	
 					} else {
-						
 						if (audioRecord.getState() != AudioRecord.STATE_INITIALIZED) {
 							isRecording = false;
-							Log.d("isRecording", ""+isRecording);
+							TrainActivity.this.tvInfo.setText("录音设备初始化失败");
 						} 
 						else {
-							btnTrain.setText("结束录音");
-							btnTrain.setEnabled(false);
-							if (audioRecord == null) {
-								audioRecord = new AudioRecord(audioSource, sampleRateInHz,
-										channelConfig, audioFormat, bufferSizeInBytes);
-							}
 							audioRecord.startRecording();
+							btnTrain.setText("结束录音");
+							btnTrain.setEnabled(true);
 							isRecording = true;
 							Log.d("isRecording", ""+isRecording);
 							
-							if (mfccTask != null && mfccTask.getStatus() == AsyncTask.Status.RUNNING) {
-								mfccTask.cancel(true);
-								mfccTask = null;
-							}
+//							if (mfccTask != null && mfccTask.getStatus() == AsyncTask.Status.RUNNING) {
+//								mfccTask.cancel(true);
+//								mfccTask = null;
+//							}
 							mfccTask = new MfccTask();
 							mfccTask.execute();
 						}
 					}
 					break;
-				
-				case R.id.btn_test:
 					
-					int[] Len = {320, 384, 512, 1024};
-					File[] cmp = new File[4];
-					File txt = new File(Cfg.getInstance().getRootDir() + Cfg.getInstance().getTmpPath() 
-							+ File.separator + Cfg.getInstance().getUserName() + ".txt");
-					for (int i=0; i<Len.length; i++) {
-						String filename = Cfg.getInstance().getRootDir() + Cfg.getInstance().getTmpPath() + 
-								File.separator + Cfg.getInstance().getUserName() + Cfg.getInstance().getFeaSuf() +Len[i];
-						System.out.println(filename);
-						cmp[i] = new File(filename);
-						if (cmp[i].exists()) {
-							cmp[i].delete();
-						}
-					}
-					for (int i=0; i<Len.length; i++) {
-						try {
-							GetMfcc getMfcc = new GetMfcc();
-							BufferedReader buffer = new BufferedReader(new FileReader(txt));
-							
-							int tLen = Len[i];
-							String line = null;
-							double[] idata = new double[1024];
-							int j = 0;
-							while ( (line = buffer.readLine()) != null ) {
-								double tmp = (double) Integer.parseInt(line);
-								idata[j] = tmp;
-								if (j == tLen-1) {
-									j = 0;
-									getMfcc.writemfcc(cmp[i], idata, tLen);
-								}
-								else {
-									j++;
-								}
-							}
-							if (j > 0) {
-								getMfcc.writemfcc(cmp[i], idata, j);
-							}
-							
-							buffer.close();
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-						Log.d("mfcc.cmp", ""+Len[i]);
-					}
-					
-					TrainActivity.this.tvInfo.setText("GetMfcc");
-					
+				default:
 					break;
+				
 			}
 			
 		}
@@ -224,15 +195,16 @@ public class TrainActivity extends Activity {
 		@Override
 		protected String doInBackground(Void... progress) {
 			
-			String rootDir = Cfg.getInstance().getRootDir();
-			String username = Cfg.getInstance().getUserName();
+//			String rootDir = Cfg.getInstance().getRootDir();
+//			String username = Cfg.getInstance().getUserName();
 			
 			this.publishProgress("正在录音...");
 			
-			short[] audioData = new short[bufferSizeInBytes];
+			short[] audioData = new short[bufferSizeInBytes+1];
 			double[] inSamples = new double[bufferSizeInBytes+1];
 			int readsize = 0;
 			
+			// write raw file
 			PrintWriter writer = null;
 			try {
 				File txt = new File(Cfg.getInstance().getRootDir() + Cfg.getInstance().getTmpPath() 
@@ -245,6 +217,7 @@ public class TrainActivity extends Activity {
 				e.printStackTrace();
 			}
 			
+			// feature file
 			File fileMfcc = new File(Cfg.getInstance().getRootDir() + Cfg.getInstance().getTmpPath() + 
 					File.separator + Cfg.getInstance().getUserName() + Cfg.getInstance().getFeaSuf());
 			if (fileMfcc.exists()) {
@@ -253,7 +226,7 @@ public class TrainActivity extends Activity {
 			
 			while (isRecording == true) {
 				readsize = audioRecord.read(audioData, 0, bufferSizeInBytes);
-				Log.d("readsize", ""+readsize);
+				
 				if (AudioRecord.ERROR_INVALID_OPERATION != readsize
 						&& AudioRecord.ERROR_BAD_VALUE != readsize) {
 
@@ -264,7 +237,6 @@ public class TrainActivity extends Activity {
 						writer.println(""+audioData[i]);
 					}
 
-//					getMfcc.writemfcc(fileMfcc, inSamples, readsize);
 					Mfcc.getInstance().write(fileMfcc, inSamples, readsize);
 				}
 			}
@@ -272,37 +244,16 @@ public class TrainActivity extends Activity {
 			writer.close();
 			
 			if (isCancelled()) {
-				Log.d("MfccTask", "isCanceled()1");
-				return null;
-			}
-			
-			this.publishProgress("正在训练模型...");
-			Recognition.TrainGmm(rootDir + Cfg.getInstance().getWorldMdlPath() + File.separator,
-					rootDir + Cfg.getInstance().getTmpPath() + File.separator,
-					rootDir + Cfg.getInstance().getTmpPath() + File.separator,
-					Cfg.getInstance().getUserName());
-			String tmpPath = rootDir + Cfg.getInstance().getTmpPath() + File.separator;
-			FileAccess.Move(tmpPath + username + Cfg.getInstance().getFeaSuf(), rootDir + Cfg.getInstance().getUsersPath() + File.separator + username + File.separator);
-			FileAccess.Move(tmpPath + username + Cfg.getInstance().getMdlSuf(), rootDir + Cfg.getInstance().getUsersPath() + File.separator + username + File.separator);
-			
-			if (isCancelled()) {
 				Log.d("MfccTask", "isCanceled()2");
 				return null;
 			}
-						
-			return "训练完成";
+			
+			return "正在训练模型...";
 		}
 		
 		@Override
 		protected void onProgressUpdate(String... values) {
-			if (values[0].equals("正在录音..."))
-				TrainActivity.this.btnTrain.setEnabled(true);
-			if (values[0].equals("正在训练模型...")) {
-				TrainActivity.this.btnTrain.setEnabled(false);
-//				TrainActivity.this.btnTest.setEnabled(true);
-			}
 			if (isCancelled()) {
-				TrainActivity.this.btnTrain.setEnabled(true);
 				TrainActivity.this.tvInfo.setText("被取消");
 				return ;
 			}
@@ -312,11 +263,27 @@ public class TrainActivity extends Activity {
 		
 		@Override
 		protected void onPostExecute(String result) {
-			TrainActivity.this.btnTrain.setEnabled(true);
+			TrainActivity.this.btnTrain.setEnabled(false);
 			TrainActivity.this.tvInfo.setText(result);
 			super.onPostExecute(result);
-			Toast.makeText(getApplicationContext(), "训练成功", Toast.LENGTH_SHORT).show();
-			TrainActivity.this.finish();
+			
+			Intent trainService = new Intent(TrainActivity.this, TrainService.class);
+			trainService.putExtra(TrainService.EXTRA_TRAINER, Cfg.getInstance().getUserName());
+			TrainActivity.this.startService(trainService);
+		}
+		
+	}
+	
+	public class TrainBroadcastReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context content, Intent intent) {
+			String action = intent.getAction();
+			if (action.equals(TrainService.ACTION_FINISH_TRAIN)) {
+				TrainActivity.this.btnTrain.setText("开始录音");
+				TrainActivity.this.btnTrain.setEnabled(true);
+				TrainActivity.this.tvInfo.setText("训练完成");
+			}
 		}
 		
 	}

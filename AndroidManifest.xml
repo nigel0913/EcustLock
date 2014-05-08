@@ -39,6 +39,13 @@
             android:launchMode="singleTask">
         </service>
         
+        <service 
+            android:name="com.nigel.service.TrainService"
+            android:enabled="true"
+            android:excludeFromRecents="true"  
+            android:launchMode="singleTask">
+        </service>
+        
         <activity
             android:name="com.nigel.ecustlock.LockActivity"
 			android:theme="@android:style/Theme.Wallpaper.NoTitleBar"

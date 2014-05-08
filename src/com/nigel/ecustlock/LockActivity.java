@@ -256,7 +256,7 @@ public class LockActivity extends FragmentActivity implements ScoreDialog.ScoreD
 				file.delete();
 			}
 			Log.d("file.name", file.getName());
-			double[] inSamples = new double[1024];
+			double[] inSamples = new double[bufferSizeInBytes + 1];
 			while (isRecording == true) {
 				readsize = audioRecord.read(audioData, 0, bufferSizeInBytes);
 
