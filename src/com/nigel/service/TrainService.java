@@ -8,6 +8,7 @@ import com.support.Cfg;
 import com.support.FileAccess;
 import com.support.Recognition;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -64,10 +65,10 @@ public class TrainService extends Service {
 //		stopForeground(true);
 	}
 	
-	public class ModelTask extends AsyncTask<Void, String, Void> {
+	public class ModelTask extends AsyncTask<Void, String, String> {
 
 		@Override
-		protected Void doInBackground(Void... params) {
+		protected String doInBackground(Void... params) {
 			TrainService.setStatus(TrainService.Status.TRAINING);
 			this.publishProgress("正在训练" + trainer + "...");
 			String rootDir = Cfg.getInstance().getRootDir();
@@ -83,26 +84,33 @@ public class TrainService extends Service {
 			}
 			FileAccess.Move(tmpPath + trainer + Cfg.getInstance().getFeaSuf(), rootDir + Cfg.getInstance().getUsersPath() + File.separator + trainer + File.separator);
 			FileAccess.Move(tmpPath + trainer + Cfg.getInstance().getMdlSuf(), rootDir + Cfg.getInstance().getUsersPath() + File.separator + trainer + File.separator);
-			this.publishProgress("训练完成");
+			return "训练完成";
+		}
+		
+		@Override
+		protected void onProgressUpdate(String... values) {
+			showNotification(values[0], false);
+			Toast.makeText(getApplicationContext(), values[0], Toast.LENGTH_SHORT).show();
+			super.onProgressUpdate(values);
+		}
+		
+		@Override
+		protected void onPostExecute(String result) {
+			super.onPostExecute(result);
+			
+			showNotification(result, true);
+			
 			TrainService.setStatus(TrainService.Status.RUNNING);
 			Intent intent = new Intent();
 			intent.setAction(ACTION_FINISH_TRAIN);
 			sendBroadcast(intent);
 			
 			TrainService.this.stopSelf();
-			return null;
-		}
-		
-		@Override
-		protected void onProgressUpdate(String... values) {
-			showNotification(values[0]);
-			Toast.makeText(getApplicationContext(), values[0], Toast.LENGTH_SHORT).show();
-			super.onProgressUpdate(values);
 		}
 		
 	}
 	
-	private void showNotification(String info) {
+	private void showNotification(String info, boolean ifSound) {
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(TrainService.this);
 		builder.setSmallIcon(R.drawable.ic_hourglass);
 		builder.setContentTitle("训练模型");
@@ -117,7 +125,11 @@ public class TrainService extends Service {
 		builder.setContentIntent(resultPendingIntent);
 		builder.setAutoCancel(false);
 		NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		manager.notify(913, builder.build());
+		Notification notification = builder.build();
+		if (ifSound) {
+			notification.defaults |= Notification.DEFAULT_SOUND;
+		}
+		manager.notify(913, notification);
 //		startForeground(913, builder.build());
 	}
 	
