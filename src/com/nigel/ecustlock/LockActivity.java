@@ -31,6 +31,7 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.support.v4.app.DialogFragment;
@@ -78,6 +79,7 @@ public class LockActivity extends FragmentActivity implements ScoreDialog.ScoreD
 	boolean isRecording = false;
 	AudioRecord audioRecord = null;
 	AuthenTask ATask = null;
+	SecondsRoundTask STask = null;
 	
 	SQLiteDatabase database = null;
 
@@ -113,11 +115,6 @@ public class LockActivity extends FragmentActivity implements ScoreDialog.ScoreD
 		mShortAnimationDuration = getResources().getInteger(
 				android.R.integer.config_shortAnimTime);
 
-		bufferSizeInBytes = AudioRecord.getMinBufferSize(sampleRateInHz,
-				channelConfig, audioFormat);
-		audioRecord = new AudioRecord(audioSource, sampleRateInHz,
-				channelConfig, audioFormat, bufferSizeInBytes);
-		
 		SqlOpenHelper helper = new SqlOpenHelper(getApplicationContext());
 		database = helper.getReadableDatabase();
 
@@ -134,6 +131,25 @@ public class LockActivity extends FragmentActivity implements ScoreDialog.ScoreD
 	protected void onStart() {
 		Log.v(ac_tag, "onStart");
 		super.onStart();
+		
+		bufferSizeInBytes = AudioRecord.getMinBufferSize(sampleRateInHz,
+				channelConfig, audioFormat);
+		audioRecord = new AudioRecord(audioSource, sampleRateInHz,
+				channelConfig, audioFormat, bufferSizeInBytes);
+	}
+	
+	@Override
+	protected void onStop() {
+		super.onStop();
+		Log.v(ac_tag, "onStop");
+
+		if (audioRecord != null) {
+			if (audioRecord.getRecordingState() != AudioRecord.RECORDSTATE_RECORDING) {
+				audioRecord.stop();
+			}
+			audioRecord.release();
+			audioRecord = null;
+		}
 	}
 
 	@Override
@@ -168,8 +184,17 @@ public class LockActivity extends FragmentActivity implements ScoreDialog.ScoreD
 					audioRecord.startRecording();
 					isRecording = true;
 				}
+				STask = new SecondsRoundTask();
+				
 				ATask = new AuthenTask();
-				ATask.execute();
+				
+				if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB ) {
+					STask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+					ATask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				} else {
+					STask.execute();
+					ATask.execute();
+				}
 			}
 		}
 
@@ -179,14 +204,12 @@ public class LockActivity extends FragmentActivity implements ScoreDialog.ScoreD
 	protected void onPause() {
 		Log.v(ac_tag, "onPause");
 		super.onPause();
-	}
-	
-	@Override
-	protected void onStop() {
-		super.onStop();
-		Log.v(ac_tag, "onStop");
+		
 		if (ATask != null) {
 			ATask.cancel(true);
+		}
+		if (STask != null) {
+			STask.cancel(true);
 		}
 		isRecording = false;
 		if (audioRecord != null) {
@@ -201,14 +224,6 @@ public class LockActivity extends FragmentActivity implements ScoreDialog.ScoreD
 		super.onDestroy();
 		
 		database.close();
-		if (audioRecord != null) {
-			if (audioRecord.getRecordingState() != AudioRecord.RECORDSTATE_RECORDING) {
-				audioRecord.stop();
-			}
-			audioRecord.release();
-			audioRecord = null;
-		}
-		
 	}
 
 	@Override
@@ -220,11 +235,6 @@ public class LockActivity extends FragmentActivity implements ScoreDialog.ScoreD
 			return true;
 		case KeyEvent.KEYCODE_MENU:
 			isRecording = false;
-			if (audioRecord != null) {
-				audioRecord.stop();
-				audioRecord.release();
-				audioRecord = null;
-			}
 //			crossfade();
 			return true;
 		}
@@ -288,6 +298,7 @@ public class LockActivity extends FragmentActivity implements ScoreDialog.ScoreD
 				namelist.add(name);
 				cursor.moveToNext();
 			}
+			
 			// recognize
 			String tmpPath = rootDir + Cfg.getInstance().getTmpPath() + File.separator;
 			Log.d("Test", "start: tmpPath=" + tmpPath);
@@ -307,6 +318,11 @@ public class LockActivity extends FragmentActivity implements ScoreDialog.ScoreD
 				}
 				
 			}
+			
+			if (isCancelled()) {
+				return "±»È¡Ïû";
+			}
+			
 			Log.d("recognize result", ""+score);
 			return result;
 		}
@@ -327,7 +343,7 @@ public class LockActivity extends FragmentActivity implements ScoreDialog.ScoreD
 			}
 			LockActivity.this.progressView.setText(statusString[ progress[0] ]);
 			
-			Log.v(async_tag, "onProgressUpdate");
+			Log.v(async_tag, "onProgressUpdate" + progress[0]);
 			super.onProgressUpdate(progress);
 		}
 
@@ -349,13 +365,33 @@ public class LockActivity extends FragmentActivity implements ScoreDialog.ScoreD
 			super.onPostExecute(result);
 		}
 		
-		@Override
-		protected void onCancelled() {
-			super.onCancelled();
-			// TODO release audio record
-			Log.v(async_tag, "onCancelled");
-		}
+	}
+	
+	public class SecondsRoundTask extends AsyncTask<Void, Void, Void> {
 
+		@Override
+		protected Void doInBackground(Void... progress) {
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			
+			if (isCancelled())
+				return null;
+			
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			
+			LockActivity.this.isRecording = false;
+			LockActivity.this.audioRecord.stop();
+			Log.d("isRecording", ""+LockActivity.this.isRecording);
+			Toast.makeText(getApplicationContext(), "2000ms", Toast.LENGTH_SHORT).show();
+		}
 	}
 	
 	private void crossfade() {
@@ -414,6 +450,7 @@ public class LockActivity extends FragmentActivity implements ScoreDialog.ScoreD
 
 	public void showResultDialog() {
 		DialogFragment dialog = new ScoreDialog();
+		dialog.setCancelable(false);
 		dialog.show(getSupportFragmentManager(), "score");
 	}
 //	

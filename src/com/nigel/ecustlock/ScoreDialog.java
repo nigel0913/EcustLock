@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import com.support.InfoRecord;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -28,6 +30,7 @@ public class ScoreDialog extends DialogFragment implements OnItemClickListener {
 	
 	float threshold = 0;
 	HashMap<String, Float> mapScore = new HashMap<String, Float>();
+	ArrayList<HashMap<String, Object>> itemList = null;
 	
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -56,6 +59,7 @@ public class ScoreDialog extends DialogFragment implements OnItemClickListener {
 			@Override
 			public void onClick(DialogInterface dialog, int id) {
 				// TODO add the other
+				InfoRecord.WriteScoreInfo(itemList, "_other_");
 				mListener.onDialogNegativeClick(ScoreDialog.this);
 				ScoreDialog.this.getDialog().cancel();
 			}	
@@ -94,35 +98,35 @@ public class ScoreDialog extends DialogFragment implements OnItemClickListener {
 	
 	private List<HashMap<String, Object>> getData() {
 		
-		ArrayList<HashMap<String, Object>> list = new ArrayList<HashMap<String, Object>>();
+		itemList = new ArrayList<HashMap<String, Object>>();
 		HashMap<String, Object> map = null;
 
-		Iterator it = this.mapScore.keySet().iterator();
+		Iterator<String> it = this.mapScore.keySet().iterator();
 		while (it.hasNext()) {
 			String name = (String) it.next();
 			Float score = this.mapScore.get(name);
 			map = new HashMap<String, Object>();
 			map.put("name", name);
 			map.put("score", score);
-			if (list.size() == 0) {
-				list.add(map);
+			if (itemList.size() == 0) {
+				itemList.add(map);
 			}
 			else {
 				boolean hasInsert = false;
-				for (int i = 0; i < list.size(); i++) {
-					if (score > (Float)list.get(i).get("score")) {
-						list.add(i, map);
+				for (int i = 0; i < itemList.size(); i++) {
+					if (score > (Float)itemList.get(i).get("score")) {
+						itemList.add(i, map);
 						hasInsert = true;
 						break;
 					}
 				}
 				if (!hasInsert) {
-					list.add(map);
+					itemList.add(map);
 				}
 			}
 		}
 		
-		return list;
+		return itemList;
 	}
 
 	@Override
@@ -130,8 +134,9 @@ public class ScoreDialog extends DialogFragment implements OnItemClickListener {
 		ListView listView = (ListView) parent;
 		HashMap<String, Object> map = (HashMap<String, Object>) listView.getItemAtPosition(position);
 		String name = (String) map.get("name");
-		Float score = (Float) map.get("score");
-		Toast.makeText(getActivity(), name+" "+score, Toast.LENGTH_SHORT).show();
+//		Float score = (Float) map.get("score");
+//		Toast.makeText(getActivity(), name+" "+score, Toast.LENGTH_SHORT).show();
+		InfoRecord.WriteScoreInfo(itemList, name);
 		ScoreDialog.this.dismiss();
 		mListener.onFinish();
 	}
