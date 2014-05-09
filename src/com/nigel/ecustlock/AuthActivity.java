@@ -32,7 +32,6 @@ public class AuthActivity extends Activity implements OnClickListener, OnTouchLi
 	public void onClick(View v) {
 		switch (v.getId()) {
 			case R.id.tv_test_info:
-				
 				break;
 		}
 		

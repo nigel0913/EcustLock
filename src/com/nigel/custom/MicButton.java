@@ -49,10 +49,8 @@ public class MicButton extends View {
 		shadowPaint.setColor(Color.WHITE);
 		shadowPaint.setAntiAlias(true);
 		
-        background = BitmapFactory.decodeResource(getResources(), R.drawable.ic_anonymous);
+        background = BitmapFactory.decodeResource(getResources(), R.drawable.ic_lock_holo_dark);
 		bitmapShader = new BitmapShader(background, Shader.TileMode.MIRROR, Shader.TileMode.REPEAT);
-//		shapeDrawable = new ShapeDrawable(new OvalShape());
-//		shapeDrawable.getPaint().setShader(bitmapShader);
 	}
 
 	@Override
@@ -63,9 +61,8 @@ public class MicButton extends View {
 		int minLength = Math.min(getWidth(), getHeight());
 		
 		canvas.drawCircle(cx, cy, minLength/2-HALO_WIDTH, shadowPaint);
-		
-		canvas.drawCircle(cx,  cy, minLength/2-HALO_WIDTH-3, paint);
-        
+		canvas.drawCircle(cx, cy, minLength/2-HALO_WIDTH-3, paint);
+        canvas.drawBitmap(background, cx - background.getWidth()/2, cy - background.getHeight()/2, paint);
 	}
 	
 	@Override
