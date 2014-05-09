@@ -6,7 +6,7 @@
 
     <uses-sdk
         android:minSdkVersion="16"
-        android:targetSdkVersion="18" />
+        android:targetSdkVersion="19" />
     <permission android:name="android.permission.GET_TASKS"></permission>
     <permission android:name="android.permission.EXPAND_STATUS_BAR"></permission>
     <permission android:name="android.permission.STATUS_BAR"></permission>
@@ -51,6 +51,12 @@
 			android:theme="@android:style/Theme.Wallpaper.NoTitleBar"
 			android:launchMode="singleInstance" > <!-- 单例运行Activity -->
         </activity>   
+        
+        <activity 
+            android:name=".AuthActivity"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            android:launchMode="singleInstance">
+        </activity>
         
         <activity
             android:name="com.nigel.ecustlock.MainActivity"

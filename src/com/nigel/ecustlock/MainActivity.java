@@ -26,6 +26,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	Button btnConfig = null;
 	Button btnMfccTest = null;
 	Button btnUserManager = null;
+	Button btnTestAuth = null;
 	
 	final String life_tag = "MainActivity"; 
 	
@@ -45,11 +46,13 @@ public class MainActivity extends Activity implements OnClickListener {
 		this.btnConfig = (Button) super.findViewById(R.id.btn_config);
 		this.btnMfccTest = (Button) super.findViewById(R.id.btn_mfcctest);
 		this.btnUserManager = (Button) super.findViewById(R.id.btn_user_manager);
+		this.btnTestAuth = (Button) super.findViewById(R.id.btn_test_auth);
 		
 		this.btnModifyPwd.setOnClickListener(this);
 		this.btnOpenTrain.setOnClickListener(this);
 		this.btnConfig.setOnClickListener(this);
 		this.btnMfccTest.setOnClickListener(this);
+		this.btnTestAuth.setOnClickListener(this);
 
 		Intent intent = getIntent();
 		String userName = intent.getStringExtra("user_name");
@@ -178,6 +181,10 @@ public class MainActivity extends Activity implements OnClickListener {
 				break;
 			case R.id.btn_user_manager:
 				intent = new Intent(MainActivity.this, UsersActivity.class);
+				MainActivity.this.startActivity(intent);
+				break;
+			case R.id.btn_test_auth:
+				intent = new Intent(MainActivity.this, AuthActivity.class);
 				MainActivity.this.startActivity(intent);
 				break;
 			default:

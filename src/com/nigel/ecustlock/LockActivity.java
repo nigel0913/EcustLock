@@ -1,17 +1,13 @@
 package com.nigel.ecustlock;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
-import com.nigel.ecustlock.ResultDialog.ResultDialogListener;
 import com.support.Cfg;
-import com.support.GetMfcc;
 import com.support.Recognition;
 import com.support.SqlOpenHelper;
 import com.support.Test;
@@ -19,14 +15,10 @@ import com.support.mfcc.Mfcc;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Bitmap;
-import android.graphics.Point;
-import android.graphics.Rect;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
@@ -39,7 +31,6 @@ import android.support.v4.app.FragmentActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;

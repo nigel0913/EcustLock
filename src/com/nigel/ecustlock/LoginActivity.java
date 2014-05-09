@@ -10,9 +10,7 @@ import com.support.Cfg;
 import com.support.SqlOpenHelper;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;

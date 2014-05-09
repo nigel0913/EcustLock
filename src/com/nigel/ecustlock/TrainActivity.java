@@ -1,15 +1,11 @@
 package com.nigel.ecustlock;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.PrintWriter;
 
 import com.nigel.service.TrainService;
 import com.support.Cfg;
-import com.support.GetMfcc;
 import com.support.mfcc.Mfcc;
 
 import android.app.ActionBar;
