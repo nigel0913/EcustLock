@@ -70,10 +70,12 @@ public class MicButton extends View {
 		switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
 				shadowPaint.setShadowLayer(HALO_WIDTH, 0, 0, Color.WHITE);
+				paint.setColor(0xee0099cc);
 				invalidate();
 				return true;
 			case MotionEvent.ACTION_UP:
 				shadowPaint.setShadowLayer(0, 0, 0, Color.WHITE);
+				paint.setColor(0xcc0099cc);
 				invalidate();
 				return true;
 		

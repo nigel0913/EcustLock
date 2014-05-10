@@ -23,7 +23,44 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:text="TextView" />
+            android:text="" />
+
+        <ImageView
+            android:id="@+id/auth_avatar_small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tv_test_info"
+            android:layout_centerHorizontal="true"
+            android:background="@color/light_blue"
+            android:contentDescription="@string/welcome"
+            android:src="@drawable/anonymous_selected" />
+
+        <TextView
+            android:id="@+id/tv_auth_result"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/auth_avatar_small"
+            android:layout_centerHorizontal="true"
+            android:text="@string/welcome" />
+
+        <ProgressBar
+            android:id="@+id/progressBar1"
+            style="?android:attr/progressBarStyleLargeInverse"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tv_auth_result"
+            android:layout_centerHorizontal="true" />
+
+        <ImageView
+            android:id="@+id/auth_avater_big"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:background="@color/light_blue"
+            android:contentDescription="@string/welcome"
+            android:src="@drawable/anonymous_selected"
+            android:visibility="invisible" />
 
     </RelativeLayout>
 

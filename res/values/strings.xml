@@ -32,6 +32,7 @@
     <string name="train_tips">提示：训练时长以30秒到1分钟为宜</string>
     <string name="train_not_start">训练尚未开始</string>
     <string name="test_auth">测试认证</string>
+    <string name="welcome">欢迎</string>
     
 
 </resources>
