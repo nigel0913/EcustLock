@@ -1,6 +1,7 @@
 package com.nigel.service;
 
 
+import com.nigel.ecustlock.AuthActivity;
 import com.nigel.ecustlock.LockActivity;
 
 import android.app.Notification;
@@ -72,7 +73,7 @@ public class LockService extends Service {
 		receiverOff = new BroadcastReceiver() {
 			public void onReceive(Context context, Intent intent) {
 				Log.d(LOG_TAG, "receive SCREEN_OFF");
-				Intent startMain = new Intent(context, LockActivity.class);
+				Intent startMain = new Intent(context, AuthActivity.class);
 				startMain.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				context.startActivity(startMain);
 			}

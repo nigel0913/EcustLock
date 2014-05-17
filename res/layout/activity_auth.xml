@@ -8,6 +8,26 @@
         android:id="@+id/relativeLayout1"
         android:layout_width="match_parent"
         android:layout_height="128dp" >
+
+        <TextView
+            android:id="@+id/tv_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="32dp"
+            android:text="@string/default_time"
+            android:textSize="56sp" />
+
+        <TextView
+            android:id="@+id/tv_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tv_time"
+            android:layout_centerHorizontal="true"
+            android:text="@string/default_time"
+            android:textSize="16sp" />
+
     </RelativeLayout>
 
     <RelativeLayout
@@ -23,33 +43,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:text="" />
-
-        <ImageView
-            android:id="@+id/auth_avatar_small"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/tv_test_info"
-            android:layout_centerHorizontal="true"
-            android:background="@color/light_blue"
-            android:contentDescription="@string/welcome"
-            android:src="@drawable/anonymous_selected" />
-
-        <TextView
-            android:id="@+id/tv_auth_result"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/auth_avatar_small"
-            android:layout_centerHorizontal="true"
-            android:text="@string/welcome" />
-
-        <ProgressBar
-            android:id="@+id/progressBar1"
-            style="?android:attr/progressBarStyleLargeInverse"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/tv_auth_result"
-            android:layout_centerHorizontal="true" />
+            android:text=""
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/auth_avater_big"
@@ -61,6 +56,24 @@
             android:contentDescription="@string/welcome"
             android:src="@drawable/anonymous_selected"
             android:visibility="invisible" />
+
+        <ProgressBar
+            android:id="@+id/loading_spinner"
+            style="?android:progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true" />
+
+        <TextView
+            android:id="@+id/tv_welcome"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/auth_avater_big"
+            android:layout_centerHorizontal="true"
+            android:gravity="center"
+            android:text="@string/welcome"
+            android:textSize="20sp" />
 
     </RelativeLayout>
 

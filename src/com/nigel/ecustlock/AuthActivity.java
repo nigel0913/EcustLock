@@ -1,49 +1,125 @@
 package com.nigel.ecustlock;
 
+import java.io.File;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+
 import com.nigel.custom.MicButton;
+import com.support.Cfg;
+import com.support.Recognition;
+import com.support.SqlOpenHelper;
+import com.support.mfcc.Mfcc;
 
 import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.app.Activity;
-import android.graphics.Point;
-import android.graphics.Rect;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.media.AudioFormat;
+import android.media.AudioRecord;
+import android.media.MediaRecorder;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class AuthActivity extends Activity 
 		implements OnClickListener, OnTouchListener {
 
 	MicButton btnAuth;
 	TextView tvInfo;
-	ImageView imageSmall;
+	TextView tvWelcome;
+	ImageView ivAvatar;
+	ProgressBar pbLoading;
+	TextView timeView = null;
+	TextView dateView = null;
+	DecimalFormat decimalFormat;
+	static String[] weekDaysName = { "星期日", "星期一", "星期二", "星期三", "星期四", "星期五",
+				"星期六" };
 	
 	Animator mCurrentAnimator;
 	int mShortAnimationDuration;
 	
+	int audioSource = MediaRecorder.AudioSource.MIC;
+	int sampleRateInHz = 8000;
+	int channelConfig = AudioFormat.CHANNEL_IN_MONO;
+	int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
+	int bufferSizeInBytes = 0;
+	boolean isRecording = false;
+	AudioRecord audioRecord = null;
+	
+	SQLiteDatabase database = null;
+	AuthTask authTask = null;
+	
+	HashMap<String, Float> mapScore = new HashMap<String, Float>();
+	
+	boolean pressed = false;
+	
+	String rootDir = null;
+	String tmpPath = null;
+	
+	float threshold;
+	float highest;
+	
+	final String ac_tag = "AuthActivity";
+	
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		btnAuth = new MicButton(getApplicationContext());
+		Window win = getWindow();
+		WindowManager.LayoutParams winParams = win.getAttributes();
+		winParams.flags |= (WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
+				| WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+				| WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON | WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		// | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+		win.setAttributes(winParams);
 		setContentView(R.layout.activity_auth);
 		
 		btnAuth = (MicButton) super.findViewById(R.id.micButton1);
 		tvInfo = (TextView) super.findViewById(R.id.tv_test_info);
-		imageSmall = (ImageView) super.findViewById(R.id.auth_avatar_small);
+		tvWelcome = (TextView) super.findViewById(R.id.tv_welcome);
+		ivAvatar = (ImageView) super.findViewById(R.id.auth_avater_big);
+		pbLoading = (ProgressBar) super.findViewById(R.id.loading_spinner);
+		timeView = (TextView) super.findViewById(R.id.tv_time);
+		dateView = (TextView) super.findViewById(R.id.tv_date);
+		
+		decimalFormat = new DecimalFormat("00");
+		
 		btnAuth.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 		btnAuth.setOnTouchListener(this);
+		tvWelcome.setText("请按住录解锁键录音");
+		
+		ivAvatar.setVisibility(View.INVISIBLE);
+		pbLoading.setVisibility(View.INVISIBLE);
 		
 		// Retrieve and cache the system's default "short" animation time.
         mShortAnimationDuration = getResources().getInteger(
                 android.R.integer.config_shortAnimTime);
+        
+		SqlOpenHelper helper = new SqlOpenHelper(getApplicationContext());
+		database = helper.getReadableDatabase();
+		
+		rootDir = Cfg.getInstance().getRootDir();
+		tmpPath = rootDir + Cfg.getInstance().getTmpPath() + File.separator;
+		
+		SharedPreferences sharedPref = getSharedPreferences(getString(R.string.s_settingsPreferences), Context.MODE_PRIVATE);
+		String key = getString(R.string.s_settingsThreshold);
+		threshold = sharedPref.getFloat(key, -50);
+		
 	}
 
 	@Override
@@ -60,160 +136,202 @@ public class AuthActivity extends Activity
 		switch (v.getId()) {
 			case R.id.micButton1:
 				if (event.getAction() == MotionEvent.ACTION_DOWN) {
-					tvInfo.setText("按下");
-					zoomImage(imageSmall, R.drawable.anonymous_selected);
+//					tvInfo.setText("按下");
+					pressed = true;
+					if (authTask != null) {
+						if (authTask.getStatus() != AsyncTask.Status.FINISHED) {
+							return false;
+						}
+					}
+					
+					pbLoading.setVisibility(View.INVISIBLE);
+					
+					if (audioRecord.getState() == AudioRecord.STATE_INITIALIZED) {
+						if (isRecording == false) {
+							audioRecord.startRecording();
+							isRecording = true;
+							authTask = new AuthTask();
+							authTask.execute();
+						}
+						
+					}
 				}
 				else if (event.getAction() == MotionEvent.ACTION_UP) {
-					tvInfo.setText("收回");
+//					tvInfo.setText("收回");
+					pressed = false;
+					if (audioRecord.getState() == AudioRecord.STATE_INITIALIZED) {
+						if (isRecording == true) {
+							audioRecord.stop();
+							isRecording = false;
+						}
+					}
 				}
-					
 				return false;
 		}
 		
 		return false;
 	}
 	
-	private void zoomImage(final View thumbView, int imageResId) {
-		// If there's an animation in progress, cancel it
-	    // immediately and proceed with this one.
-	    if (mCurrentAnimator != null) {
-	        mCurrentAnimator.cancel();
-	    }
-	    
-	    final ImageView expandedImageView = (ImageView) findViewById(R.id.auth_avater_big);
-	    expandedImageView.setImageResource(imageResId);
+	@Override
+	protected void onStart() {
+		super.onStart();
+		
+		Log.d(ac_tag, "onStart");
+		bufferSizeInBytes = AudioRecord.getMinBufferSize(sampleRateInHz,
+				channelConfig, audioFormat);
+		audioRecord = new AudioRecord(audioSource, sampleRateInHz,
+				channelConfig, audioFormat, bufferSizeInBytes);
+		
+		if (audioRecord.getState() == AudioRecord.STATE_UNINITIALIZED) {
+			tvWelcome.setText("录音设备初始化失败");
+		}
+		else {
+			tvWelcome.setText("请按住录解锁键录音");
+		}
+	}
+	
+	@Override
+	protected void onStop() {
+		super.onStop();
+		
+		Log.d(ac_tag, "onStop");
+		if (audioRecord != null &&
+				audioRecord.getState() == AudioRecord.STATE_INITIALIZED) {
+			if (audioRecord.getRecordingState() != AudioRecord.RECORDSTATE_RECORDING) {
+				audioRecord.stop();
+			}
+			Log.d("audioRecord", "release");
+			audioRecord.release();
+			audioRecord = null;
+		}
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		Calendar c = Calendar.getInstance();
+		int weekIndex = c.get(Calendar.DAY_OF_WEEK) - 1;
 
-	    // Calculate the starting and ending bounds for the zoomed-in image.
-	    // This step involves lots of math. Yay, math.
-	    final Rect startBounds = new Rect();
-	    final Rect finalBounds = new Rect();
-	    final Point globalOffset = new Point();
-	    
-	    // The start bounds are the global visible rectangle of the thumbnail,
-	    // and the final bounds are the global visible rectangle of the container
-	    // view. Also set the container view's offset as the origin for the
-	    // bounds, since that's the origin for the positioning animation
-	    // properties (X, Y).
-	    thumbView.getGlobalVisibleRect(startBounds);
-	    findViewById(R.id.relativeLayout2)
-	            .getGlobalVisibleRect(finalBounds, globalOffset);
-	    Log.d("globalOffset", "x="+globalOffset.x + ", y="+globalOffset.y);
-	    Log.d("startBounds0", "left="+startBounds.left + ", right="+startBounds.right);
-	    Log.d("startBounds0", "top="+startBounds.top + ", bottom="+startBounds.bottom);
-	    startBounds.offset(-globalOffset.x, -globalOffset.y);
-	    finalBounds.offset(-globalOffset.x, -globalOffset.y);
-	    
-	    // Adjust the start bounds to be the same aspect ratio as the final
-	    // bounds using the "center crop" technique. This prevents undesirable
-	    // stretching during the animation. Also calculate the start scaling
-	    // factor (the end scaling factor is always 1.0).
-	    float startScale;
-	    if ((float) finalBounds.width() / finalBounds.height()
-	            > (float) startBounds.width() / startBounds.height()) {
-	        // Extend start bounds horizontally
-	        startScale = (float) startBounds.height() / finalBounds.height();
-	        float startWidth = startScale * finalBounds.width();
-	        float deltaWidth = (startWidth - startBounds.width()) / 2;
-//	        startBounds.left -= deltaWidth;
-//	        startBounds.right += deltaWidth;
-	    } else {
-	        // Extend start bounds vertically
-	        startScale = (float) startBounds.width() / finalBounds.width();
-	        float startHeight = startScale * finalBounds.height();
-	        float deltaHeight = (startHeight - startBounds.height()) / 2;
-//	        startBounds.top -= deltaHeight;
-//	        startBounds.bottom += deltaHeight;
-	    }
-	    Log.d("scale", ""+startScale);
-	    Log.d("startBounds1", "left="+startBounds.left + ", right="+startBounds.right);
-	    Log.d("startBounds1", "top="+startBounds.top + ", bottom="+startBounds.bottom);
-	    Log.d("finalBounds1", "left="+finalBounds.left + ", right="+finalBounds.right);
-	    Log.d("finalBounds1", "top="+finalBounds.top + ", bottom="+finalBounds.bottom);
-	    // Hide the thumbnail and show the zoomed-in view. When the animation
-	    // begins, it will position the zoomed-in view in the place of the
-	    // thumbnail.
-	    thumbView.setAlpha(0f);
-	    expandedImageView.setVisibility(View.VISIBLE);
+		this.timeView.setText(""
+				+ decimalFormat.format(c.get(Calendar.HOUR_OF_DAY)) + ":"
+				+ decimalFormat.format(c.get(Calendar.MINUTE)));
+		this.dateView.setText(""
+				+ decimalFormat.format(c.get(Calendar.MONTH) + 1) + "月"
+				+ decimalFormat.format(c.get(Calendar.DAY_OF_MONTH)) + "日  "
+				+ weekDaysName[weekIndex]);
+	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		
+		database.close();
+	}
+	
+	public class AuthTask extends AsyncTask<Void, String, String> {
 
-	    // Set the pivot point for SCALE_X and SCALE_Y transformations
-	    // to the top-left corner of the zoomed-in view (the default
-	    // is the center of the view).
-	    expandedImageView.setPivotX(0f);
-	    expandedImageView.setPivotY(0f);
+		@Override
+		protected String doInBackground(Void... progress) {
+			String result = "识别结束";
+			highest = -1000;
+			this.publishProgress("正在录音...");
 
-	    // Construct and run the parallel animation of the four translation and
-	    // scale properties (X, Y, SCALE_X, and SCALE_Y).
-	    int exwidth = expandedImageView.getWidth();
-	    int exheight = expandedImageView.getHeight();
-	    AnimatorSet set = new AnimatorSet();
-	    set
-	            .play(ObjectAnimator.ofFloat(expandedImageView, View.X,
-	                    startBounds.left, finalBounds.left + finalBounds.width()/2 - exwidth/2))
-	            .with(ObjectAnimator.ofFloat(expandedImageView, View.Y,
-	                    startBounds.top, finalBounds.top + finalBounds.height()/2 - exheight/2))
-	            .with(ObjectAnimator.ofFloat(expandedImageView, View.SCALE_X,
-	            startScale, 1f)).with(ObjectAnimator.ofFloat(expandedImageView,
-	                    View.SCALE_Y, startScale, 1f));
-	    set.setDuration(mShortAnimationDuration);
-	    set.setInterpolator(new DecelerateInterpolator());
-	    set.addListener(new AnimatorListenerAdapter() {
-	        @Override
-	        public void onAnimationEnd(Animator animation) {
-	            mCurrentAnimator = null;
-	        }
+			short[] audioData = new short[bufferSizeInBytes+1];
+			int readsize = 0;
 
-	        @Override
-	        public void onAnimationCancel(Animator animation) {
-	            mCurrentAnimator = null;
-	        }
-	    });
-	    set.start();
-	    mCurrentAnimator = set;
-	    
-	    Log.d("finalBounds2", "left="+finalBounds.left + ", right="+finalBounds.right);
-	    Log.d("finalBounds2", "top="+finalBounds.top + ", bottom="+finalBounds.bottom);
-	    
-	    // Upon clicking the zoomed-in image, it should zoom back down to the original bounds
-        // and show the thumbnail instead of the expanded image.
-        final float startScaleFinal = startScale;
-        expandedImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mCurrentAnimator != null) {
-                    mCurrentAnimator.cancel();
-                }
+			File file = new File(rootDir + Cfg.getInstance().getTmpPath()
+					+ File.separator + "tmp" + Cfg.getInstance().getFeaSuf());
+			if (file.exists()) {
+				file.delete();
+			}
+			Log.d("file.name", file.getName());
+			double[] inSamples = new double[bufferSizeInBytes + 1];
+			while (isRecording == true) {
+				readsize = audioRecord.read(audioData, 0, bufferSizeInBytes);
 
-                // Animate the four positioning/sizing properties in parallel, back to their
-                // original values.
-                AnimatorSet set = new AnimatorSet();
-                set
-                        .play(ObjectAnimator.ofFloat(expandedImageView, View.X, startBounds.left))
-                        .with(ObjectAnimator.ofFloat(expandedImageView, View.Y, startBounds.top))
-                        .with(ObjectAnimator
-                                .ofFloat(expandedImageView, View.SCALE_X, startScaleFinal))
-                        .with(ObjectAnimator
-                                .ofFloat(expandedImageView, View.SCALE_Y, startScaleFinal));
-                set.setDuration(mShortAnimationDuration);
-                set.setInterpolator(new DecelerateInterpolator());
-                set.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        thumbView.setAlpha(1f);
-                        expandedImageView.setVisibility(View.GONE);
-                        mCurrentAnimator = null;
-                    }
+				if (AudioRecord.ERROR_INVALID_OPERATION != readsize
+						&& AudioRecord.ERROR_BAD_VALUE != readsize) {
 
-                    @Override
-                    public void onAnimationCancel(Animator animation) {
-                        thumbView.setAlpha(1f);
-                        expandedImageView.setVisibility(View.GONE);
-                        mCurrentAnimator = null;
-                    }
-                });
-                set.start();
-                mCurrentAnimator = set;
-            }
-        });
+					for (int i=0; i<readsize; i++){
+						inSamples[i+1] = audioData[i];
+					}
 
+					Mfcc.getInstance().write(file, inSamples, readsize);
+				}
+			}
+
+			if (isCancelled()) {
+				return "被取消";
+			}
+			
+			this.publishProgress("正在识别...");
+
+			mapScore.clear();
+			String[] columns = {SqlOpenHelper.USER_NAME};
+			List<String> namelist = new ArrayList<String>();
+			Cursor cursor = database.query(SqlOpenHelper.TABLE_USERINFO, columns, null, null, null, null, null);
+			cursor.moveToFirst();
+			while (!cursor.isAfterLast()) {
+				String name = cursor.getString(0);
+				namelist.add(name);
+				cursor.moveToNext();
+			}
+			
+			// recognize
+			Log.d("Test", "start: tmpPath=" + tmpPath);
+			for (String username : namelist) {
+				String userFileDir = rootDir + Cfg.getInstance().getUsersPath() + File.separator
+						+ username + File.separator;
+				File featrue = new File(userFileDir + username + Cfg.getInstance().getFeaSuf());
+				File model = new File(userFileDir + username + Cfg.getInstance().getMdlSuf());
+				if ( featrue.exists() && model.exists() ) {
+					float tmpscore = (float) Recognition.Test(rootDir + Cfg.getInstance().getWorldMdlPath() + File.separator,
+							rootDir + Cfg.getInstance().getTmpPath() + File.separator,
+							rootDir + Cfg.getInstance().getUsersPath() + File.separator + username + File.separator,
+							"tmp",
+							username);
+					
+					mapScore.put(username, tmpscore);
+					if (tmpscore > highest) {
+						result = username;
+						highest = tmpscore;
+					}
+				}
+				
+			}
+			
+			if (isCancelled()) {
+				return "被取消";
+			}
+			
+			Log.d("highest", "highest="+highest+",threshold="+threshold);
+			
+			if (threshold > highest)
+				result = "被拒绝";
+			
+			return result;
+		}
+		
+		@Override
+		protected void onProgressUpdate(String... values) {
+			tvWelcome.setText(values[0]);
+			if ( values[0].equals("正在识别...") ) {
+				pbLoading.setVisibility(View.VISIBLE);
+			}
+		}
+		
+		@Override
+		protected void onPostExecute(String result) {
+			pbLoading.setVisibility(View.INVISIBLE);
+			if (result.equals("被拒绝")) {
+				tvWelcome.setText("拒绝访问"+" <"+highest+","+threshold+">");
+			}
+			else {
+				tvWelcome.setText("欢迎" + result);
+				Toast.makeText(getApplicationContext(), "欢迎"+result+" <"+highest+","+threshold+">", Toast.LENGTH_SHORT).show();
+				AuthActivity.this.finish();
+			}
+		}
 	}
 }

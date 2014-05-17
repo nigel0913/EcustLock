@@ -184,7 +184,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				MainActivity.this.startActivity(intent);
 				break;
 			case R.id.btn_test_auth:
-				intent = new Intent(MainActivity.this, AuthActivity.class);
+				intent = new Intent(MainActivity.this, LockActivity.class);
 				MainActivity.this.startActivity(intent);
 				break;
 			default:
