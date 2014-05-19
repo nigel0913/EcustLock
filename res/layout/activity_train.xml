@@ -17,37 +17,69 @@
         android:layout_alignParentTop="true"
         android:text="@string/train_tips"
         android:textColor="@android:color/secondary_text_dark"
-        android:textStyle="italic" />
+        android:textStyle="italic"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/tv_rec_content"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/tv_info"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/layout_train_button"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/tv_description"
-        android:lines="14"
-        android:maxLines="20"
         android:text="@string/train_content" />
-    
-    <TextView
-        android:id="@+id/tv_info"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/btn_train"
-        android:layout_alignParentLeft="true"
-        android:scrollbars="vertical"
-        android:singleLine="false"
-        android:text="@string/train_not_start"
-        android:textColor="@android:color/darker_gray" />
 
-    <Button
-        android:id="@+id/btn_train"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:text="@string/train" />
-    
+    <RelativeLayout
+        android:id="@+id/layout_train_button"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_alignLeft="@+id/tv_rec_content"
+        android:layout_alignParentBottom="true" >
+
+        <Button
+            android:id="@+id/btn_train"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:text="@string/train" />
+
+        <RelativeLayout
+            android:id="@+id/layout_train_description"
+            android:layout_width="wrap_content"
+            android:layout_height="42dp"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/btn_train" >
+
+            <TextView
+                android:id="@+id/tv_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/pb_train_time"
+                android:layout_alignParentLeft="true"
+                android:scrollbars="vertical"
+                android:singleLine="false"
+                android:text="@string/train_not_start"
+                android:textColor="@android:color/darker_gray" />
+
+            <ProgressBar
+                android:id="@+id/pb_train_time"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true" />
+
+            <TextView
+                android:id="@+id/tv_left_train_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/tv_info"
+                android:layout_alignBottom="@+id/tv_info"
+                android:layout_alignParentRight="true"
+                android:text="@string/left_time"
+                android:textColor="@android:color/darker_gray" />
+        </RelativeLayout>
+    </RelativeLayout>
     
 </RelativeLayout>

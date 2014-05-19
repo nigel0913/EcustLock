@@ -19,18 +19,21 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class TrainActivity extends Activity {
 
 	Button btnTrain = null;
 	TextView tvInfo = null;
+	TextView tvLeftTime = null;
 	
 	int audioSource = MediaRecorder.AudioSource.MIC;
 	int sampleRateInHz = 8000;
@@ -39,6 +42,10 @@ public class TrainActivity extends Activity {
 	int bufferSizeInBytes = 0;
 	boolean isRecording = false;
 	AudioRecord audioRecord = null;
+	
+	ProgressBar pbTrainTime;
+	int mProgressStatus = 0;
+	Handler mHandler = new Handler();
 	
 	MfccTask mfccTask = null;
 	TrainBroadcastReceiver trainReceiver = new TrainBroadcastReceiver();
@@ -53,6 +60,8 @@ public class TrainActivity extends Activity {
 		
 		this.btnTrain = (Button) super.findViewById(R.id.btn_train);
 		this.tvInfo = (TextView) super.findViewById(R.id.tv_info);
+		this.pbTrainTime = (ProgressBar) super.findViewById(R.id.pb_train_time);
+		this.tvLeftTime = (TextView) super.findViewById(R.id.tv_left_train_time);
 		
 		this.btnTrain.setOnClickListener(new TrainOnClickListenserImpl());
 //		this.btnTest.setOnClickListener(null);
@@ -96,14 +105,16 @@ public class TrainActivity extends Activity {
 		
 		if (TrainService.getStatus() == TrainService.Status.TRAINING) {
 			String trainer = TrainService.getTrainer();
-			tvInfo.setText("正在训练" + trainer + "中");
-			btnTrain.setText("正在训练" + trainer + "中");
+			tvInfo.setText("正在训练 [" + trainer + "]");
 			btnTrain.setEnabled(false);
+			pbTrainTime.setIndeterminate(true);
 		}
 		else {
-			btnTrain.setText("开始录音");
 			btnTrain.setEnabled(true);
+			pbTrainTime.setIndeterminate(false);
 		}
+		
+		mProgressStatus = 0;
 	}
 	
 	@Override
@@ -149,12 +160,11 @@ public class TrainActivity extends Activity {
 				case R.id.btn_train:
 					Log.d("TrainService status", ""+TrainService.getStatus());
 					if (isRecording == true) {
-						btnTrain.setText("开始录音");
 						isRecording = false;
 						if (audioRecord != null) {
 							audioRecord.stop();
 						}
-	
+						
 					} else {
 						if (audioRecord.getState() != AudioRecord.STATE_INITIALIZED) {
 							isRecording = false;
@@ -162,7 +172,6 @@ public class TrainActivity extends Activity {
 						} 
 						else {
 							audioRecord.startRecording();
-							btnTrain.setText("结束录音");
 							btnTrain.setEnabled(true);
 							isRecording = true;
 							Log.d("isRecording", ""+isRecording);
@@ -173,6 +182,36 @@ public class TrainActivity extends Activity {
 //							}
 							mfccTask = new MfccTask();
 							mfccTask.execute();
+							
+							mProgressStatus = 0;
+							// Start lengthy operation in a background thread
+					         new Thread(new Runnable() {
+					             public void run() {
+					                 while (mProgressStatus < 60) {
+					                     mProgressStatus++;
+					                     try {
+											Thread.sleep(1000);
+										} catch (InterruptedException e) {
+											e.printStackTrace();
+										}
+
+					                     // Update the progress bar
+					                     mHandler.post(new Runnable() {
+					                         public void run() {
+					                             pbTrainTime.setProgress(mProgressStatus * 5 / 3);
+					                             tvLeftTime.setText("" + (60 - mProgressStatus) + "秒");
+					                             if (mProgressStatus == 60) {
+					                            	 if (audioRecord != null) {
+					                            		 isRecording = false;
+					                            		 audioRecord.stop();
+					                            	 }
+//					                            	 btnTrain.setEnabled(true);
+					                             }
+					                         }
+					                     });
+					                 }
+					             }
+					         }).start();
 						}
 					}
 					break;
@@ -253,6 +292,7 @@ public class TrainActivity extends Activity {
 				TrainActivity.this.tvInfo.setText("被取消");
 				return ;
 			}
+			TrainActivity.this.btnTrain.setEnabled(false);
 			TrainActivity.this.tvInfo.setText(values[0]);
 			super.onProgressUpdate(values);
 		}
@@ -263,6 +303,7 @@ public class TrainActivity extends Activity {
 			TrainActivity.this.tvInfo.setText(result);
 			super.onPostExecute(result);
 			
+			TrainActivity.this.pbTrainTime.setIndeterminate(true);
 			Intent trainService = new Intent(TrainActivity.this, TrainService.class);
 			trainService.putExtra(TrainService.EXTRA_TRAINER, Cfg.getInstance().getUserName());
 			TrainActivity.this.startService(trainService);
@@ -276,9 +317,9 @@ public class TrainActivity extends Activity {
 		public void onReceive(Context content, Intent intent) {
 			String action = intent.getAction();
 			if (action.equals(TrainService.ACTION_FINISH_TRAIN)) {
-				TrainActivity.this.btnTrain.setText("开始录音");
 				TrainActivity.this.btnTrain.setEnabled(true);
 				TrainActivity.this.tvInfo.setText("训练完成");
+				TrainActivity.this.pbTrainTime.setIndeterminate(false);
 			}
 		}
 		
