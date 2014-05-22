@@ -8,6 +8,7 @@
     <string name="s_settingsPasswordKey">com.nigel.password</string>
     <string name="s_settingsSecuity">com.nigel.security</string>
     <string name="s_settingsThreshold">com.nigel.threshold</string>
+    <string name="s_settingsFirstRun">com.nigel.firstrun</string>
     <string name="user_manager">用户管理</string>
     <string name="default_time">00:00</string>
     <string name="password">密码</string>

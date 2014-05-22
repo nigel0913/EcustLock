@@ -10,7 +10,9 @@ import com.support.Cfg;
 import com.support.SqlOpenHelper;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -53,7 +55,6 @@ public class LoginActivity extends Activity {
 		
 		SqlOpenHelper helper = new SqlOpenHelper(getApplicationContext());
 		database = helper.getReadableDatabase();
-		
 		Init();
 	}
 	
@@ -74,7 +75,18 @@ public class LoginActivity extends Activity {
 			}
 			
 			Cfg.getInstance().setRootDir(rootDir);
-			InitFiles();
+			boolean firstRun = false;
+			SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(
+					getString(R.string.s_settingsPreferences),
+					Context.MODE_PRIVATE
+					);
+			firstRun = sharedPref.getBoolean(getString(R.string.s_settingsFirstRun), true);
+			if (firstRun) {
+				SharedPreferences.Editor editor = sharedPref.edit();
+				editor.putBoolean(getString(R.string.s_settingsFirstRun), false);
+				editor.commit();
+			}
+			InitFiles(firstRun);
 		}
 	}
 	
@@ -128,7 +140,7 @@ public class LoginActivity extends Activity {
 	/**
 	 * 初始化系统文件结构
 	 */
-	private void InitFiles() {
+	private void InitFiles(boolean firstRun) {
 		File fDir = null;
 		for (String dirName : Cfg.getInstance().getDirLists()) {
 			fDir = new File(Cfg.getInstance().getRootDir() + File.separator + dirName + File.separator);
@@ -138,7 +150,7 @@ public class LoginActivity extends Activity {
 		}
 		
 		File worldModel = new File(Cfg.getInstance().getRootDir() + File.separator + Cfg.getInstance().getWorldMdlPath() + File.separator + Cfg.getInstance().getWorldMdlFile());
-		if ( !worldModel.exists() ) {
+		if ( !worldModel.exists() || firstRun ) {
 			copyAssets(Cfg.getInstance().getWorldMdlFile(), Cfg.getInstance().getRootDir() + File.separator + Cfg.getInstance().getWorldMdlPath());
 		}
 	}
