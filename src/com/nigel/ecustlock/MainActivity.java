@@ -24,7 +24,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	Button btnModifyPwd = null;
 	Button btnOpenTrain = null;
 	Button btnConfig = null;
-	Button btnMfccTest = null;
+//	Button btnMfccTest = null;
 	Button btnUserManager = null;
 	Button btnTestAuth = null;
 	
@@ -44,14 +44,14 @@ public class MainActivity extends Activity implements OnClickListener {
 		this.btnModifyPwd = (Button) super.findViewById(R.id.btn_modify_passwd);
 		this.btnOpenTrain = (Button) super.findViewById(R.id.btn_open_train);
 		this.btnConfig = (Button) super.findViewById(R.id.btn_config);
-		this.btnMfccTest = (Button) super.findViewById(R.id.btn_mfcctest);
+//		this.btnMfccTest = (Button) super.findViewById(R.id.btn_mfcctest);
 		this.btnUserManager = (Button) super.findViewById(R.id.btn_user_manager);
 		this.btnTestAuth = (Button) super.findViewById(R.id.btn_test_auth);
 		
 		this.btnModifyPwd.setOnClickListener(this);
 		this.btnOpenTrain.setOnClickListener(this);
 		this.btnConfig.setOnClickListener(this);
-		this.btnMfccTest.setOnClickListener(this);
+//		this.btnMfccTest.setOnClickListener(this);
 		this.btnTestAuth.setOnClickListener(this);
 
 		Intent intent = getIntent();
@@ -175,10 +175,10 @@ public class MainActivity extends Activity implements OnClickListener {
 				intent = new Intent(MainActivity.this, PasswordActivity.class);
 				MainActivity.this.startActivity(intent);
 				break;
-			case R.id.btn_mfcctest:
-				intent = new Intent(MainActivity.this, MfccTestActivity.class);
-				MainActivity.this.startActivity(intent);
-				break;
+//			case R.id.btn_mfcctest:
+//				intent = new Intent(MainActivity.this, MfccTestActivity.class);
+//				MainActivity.this.startActivity(intent);
+//				break;
 			case R.id.btn_user_manager:
 				intent = new Intent(MainActivity.this, UsersActivity.class);
 				MainActivity.this.startActivity(intent);

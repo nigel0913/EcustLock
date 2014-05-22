@@ -27,41 +27,64 @@
     </RelativeLayout>
     
     <Button
+        android:id="@+id/btn_user_manager"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/button_top_bottom_margin"
+        android:background="@drawable/my_btn"
+        android:drawableRight="@drawable/right_arrow"
+        android:gravity="center_vertical|left"
+        android:paddingLeft="@dimen/button_text_left_pad"
+        android:text="@string/user_manager"
+        android:textColor="@color/btn_test_color"
+        android:visibility="visible" />
+    
+    <Button
         android:id="@+id/btn_modify_passwd"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/modify_password" />
+        android:layout_margin="@dimen/button_top_bottom_margin"
+        android:background="@drawable/my_btn"
+        android:drawableRight="@drawable/right_arrow"
+        android:gravity="center_vertical|left"
+        android:paddingLeft="@dimen/button_text_left_pad"
+        android:text="@string/modify_password"
+        android:textColor="@color/btn_test_color" />
 
-    <Button
-        android:id="@+id/btn_mfcctest"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="MfccTest"
-        android:visibility="gone" />
-    
     <Button 
         android:id="@+id/btn_open_train"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/train"/>
+        android:layout_margin="@dimen/button_top_bottom_margin"
+        android:text="@string/train"
+        android:background="@drawable/my_btn"
+        android:drawableRight="@drawable/right_arrow"
+        android:gravity="center_vertical|left"
+        android:paddingLeft="@dimen/button_text_left_pad"
+        android:textColor="@color/btn_test_color"/>
 
     <Button
         android:id="@+id/btn_config"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/config_setting" />
-
-    <Button
-        android:id="@+id/btn_user_manager"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/user_manager"
-        android:visibility="gone" />
+        android:layout_margin="@dimen/button_top_bottom_margin"
+        android:text="@string/config_setting"
+        android:background="@drawable/my_btn"
+        android:drawableRight="@drawable/right_arrow"
+        android:gravity="center_vertical|left"
+        android:paddingLeft="@dimen/button_text_left_pad"
+        android:textColor="@color/btn_test_color" />
 
     <Button
         android:id="@+id/btn_test_auth"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/test_auth" />
+        android:layout_margin="@dimen/button_top_bottom_margin"
+        android:text="@string/test_auth"
+        android:background="@drawable/my_btn"
+        android:drawableRight="@drawable/right_arrow"
+        android:gravity="center_vertical|left"
+        android:paddingLeft="@dimen/button_text_left_pad"
+        android:textColor="@color/btn_test_color" />
 
 </LinearLayout>
