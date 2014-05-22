@@ -4,7 +4,7 @@ import android.util.Log;
 
 public class MelBankm {
 
-	static double[][] x = new double[33][256];
+	static double[][] x = new double[48][256];
 	static int kp = 0;
 	static int kn = 0;
 	static int kfs = 0;
