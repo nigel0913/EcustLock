@@ -10,7 +10,7 @@ import android.util.Log;
 public class Mfcc {
 
 	static int dim = 26;
-	static int p = 24;
+	static int p = 40;
 	static int fs = 8000;
 	static int frame = 256;
 	
@@ -35,12 +35,13 @@ public class Mfcc {
 	
 	private static Mfcc INSTANCE = new Mfcc();
 	private Mfcc() {
+		Log.d("Mfcc", "Mfcc() start");
 		for (int i = 0; i < frame * 4; i++) {
 			buffer[i] = 0;
 		}
-		
+		Log.d("Mfcc", "hamming");
 		hammingwin = hamming(frame);
-		
+		Log.d("Mfcc", "melbankm");
 		bank = MelBankm.melbankm(p, frame, fs, 0, 0.5);
 		
 		int fn2 = (int) Math.floor( frame / 2 );
@@ -49,33 +50,36 @@ public class Mfcc {
 		// bank = bank/max(bank(:));
 		bankH = p;
 		bankW = fn2 + 1;
-		
+		Log.d("Mfcc", "Math.max(bankMax, bank[i][j])");
 		double bankMax = -1e30;
 		for (int i = 1; i <= bankH; i++) {
 			for (int j = 1; j <= bankW; j++) {
 				bankMax = Math.max(bankMax, bank[i][j]);
 			}
 		}
+		Log.d("Mfcc", "bank[i][j] / bankMax");
 		for (int i = 1; i <= bankH; i++) {
 			for (int j = 1; j <= bankW; j++) {
 				bank[i][j] = bank[i][j] / bankMax;
 			}
 		}
-		
+		Log.d("Mfcc", "Math.cos");
 		for (int k = 1; k <= dim/2; k++) {
 			for (int n = 0; n < p; n++) {
 				dct[k][n+1] = Math.cos( (2 * n + 1) * k * Math.PI / (2 * p) );
 			}
 		}
-		
+		Log.d("Mfcc", "Math.sin");
 		double maxW = -1e30;
 		for (int i = 1; i <= dim/2; i++) {
 			w[i] = 1 + 6 * Math.sin(Math.PI * i / (dim/2));
 			maxW = Math.max(maxW, w[i]);
 		}
+		Log.d("Mfcc", "w[i] / maxW");
 		for (int i = 1; i <= dim/2; i++) {
 			w[i] = w[i] / maxW;
 		}
+		Log.d("Mfcc", "Mfcc() end");
 	}
 	
 	/**
@@ -84,6 +88,7 @@ public class Mfcc {
 	 * @param len
 	 */
 	public void write(File file, double[] data, int len) {
+		Log.d("Mfcc", "write start");
 		int xlen = bufferSize + len;
 		double[] x = new double[xlen + 1];
 		for (int i = 1; i <= bufferSize; i++) {
@@ -142,6 +147,7 @@ public class Mfcc {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		Log.d("Mfcc", "write end");
 	}
 	
 	/**
@@ -153,6 +159,7 @@ public class Mfcc {
 		if (x == null)
 			return null;
 
+		Log.d("Mfcc", "mfcc start");
 		// xx = double(x);
 		// xx = filter([1 -0.9375], 1, xx);
 		double[] xx = new double[xlen+1];
@@ -216,7 +223,7 @@ public class Mfcc {
 		}
 		
 		mfccNum = framenum - 4;
-		
+		Log.d("Mfcc", "mfcc end");
 		return c2;
 	}
 	
