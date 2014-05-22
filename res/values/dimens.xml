@@ -6,5 +6,9 @@
     <dimen name="button_top_bottom_margin">4dp</dimen>
     <dimen name="button_icom_left_pad">4dp</dimen>
     <dimen name="button_text_left_pad">12dp</dimen>
+    <dimen name="switch_oval_radius">10dp</dimen>
+    
+    <dimen name="switch_thumb_padding">5dp</dimen>
+    <dimen name="button_text_size">18sp</dimen>
 
 </resources>

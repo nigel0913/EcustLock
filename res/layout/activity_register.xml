@@ -46,7 +46,7 @@
         android:layout_below="@+id/RelativeLayout1" >
 
         <TextView
-            android:id="@+id/TextView01"
+            android:id="@+id/tv_train_desc"
             android:layout_width="64dp"
             android:layout_height="48dp"
             android:layout_alignParentLeft="true"
@@ -59,10 +59,10 @@
             android:id="@+id/reg_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/TextView01"
+            android:layout_alignBaseline="@+id/tv_train_desc"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:layout_toRightOf="@+id/TextView01"
+            android:layout_toRightOf="@+id/tv_train_desc"
             android:layout_weight="1"
             android:ems="10"
             android:inputType="textPassword" />

@@ -14,7 +14,7 @@
         android:id="@+id/switch_layout"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:visibility="gone" >
+        android:visibility="visible" >
 
 	    <Switch
 	        android:id="@+id/service_switch"
@@ -86,5 +86,52 @@
         android:gravity="center_vertical|left"
         android:paddingLeft="@dimen/button_text_left_pad"
         android:textColor="@color/btn_test_color" />
+
+    <RelativeLayout
+        android:id="@+id/layout_train"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_margin="@dimen/button_top_bottom_margin"
+        android:background="@drawable/my_btn"
+        android:clickable="true"
+        android:focusable="true"
+        android:paddingLeft="@dimen/button_text_left_pad" >
+
+        <TextView
+            android:id="@+id/TextView02"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:text="@string/train"
+            android:textSize="@dimen/button_text_size" />
+
+        <TextView
+            android:id="@+id/tv_train_desc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/TextView02"
+            android:layout_alignBottom="@+id/TextView02"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/ImageView01"
+            android:text="@string/not_trained"
+            android:textColor="@android:color/darker_gray" />
+
+        <ImageView
+            android:id="@+id/ImageView01"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/right_arrow" />
+
+        <ImageView
+            android:id="@+id/iv_train_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/tv_train_desc"
+            android:src="@drawable/ic_menu_invite" />
+    </RelativeLayout>
 
 </LinearLayout>

@@ -41,6 +41,7 @@
     <string name="test_auth">测试认证</string>
     <string name="welcome">欢迎</string>
     <string name="left_time">60秒</string>
+    <string name="not_trained">尚未训练</string>
     
 
 </resources>
