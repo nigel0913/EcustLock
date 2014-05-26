@@ -43,6 +43,14 @@
     <string name="welcome">欢迎</string>
     <string name="left_time">60秒</string>
     <string name="not_trained">尚未训练</string>
+    <string name="record_30_sec">录制30秒</string>
+    <string name="record_10_sec">录制10秒</string>
+    <string name="train_new_add">训练新加用户</string>
+    <string name="train_all">重新训练所有</string>
+    <string name="stop">停止</string>
+    <string name="train_one">训练单个用户</string>
+    <string name="calculate_all">计算所有得分</string>
+    <string name="developer_mode">开发者模式</string>
     
 
 </resources>

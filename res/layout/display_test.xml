@@ -8,7 +8,7 @@
     android:paddingTop="@dimen/activity_vertical_margin" >
 
     <Button
-        android:id="@+id/button1"
+        android:id="@+id/btn_record_30"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
@@ -18,23 +18,23 @@
         android:text="Button_normal" />
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/btn_record_10"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/button1"
-        android:layout_alignRight="@+id/button1"
-        android:layout_below="@+id/button1"
+        android:layout_alignLeft="@+id/btn_record_30"
+        android:layout_alignRight="@+id/btn_record_30"
+        android:layout_below="@+id/btn_record_30"
         android:background="@drawable/btn_pressed"
         android:text="Button_pressed"
         android:textColor="@color/btn_test_color" />
 
     <Button
-        android:id="@+id/button3"
+        android:id="@+id/dev_btn_train_new_add"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/button2"
-        android:layout_alignRight="@+id/button2"
-        android:layout_below="@+id/button2"
+        android:layout_alignLeft="@+id/btn_record_10"
+        android:layout_alignRight="@+id/btn_record_10"
+        android:layout_below="@+id/btn_record_10"
         android:background="@drawable/btn_focused"
         android:drawableLeft="@android:drawable/ic_menu_close_clear_cancel"
         android:text="Button_focused" />
