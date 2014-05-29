@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.Switch;
+import android.widget.TextView;
 
 public class MainActivity extends Activity implements OnClickListener {
 
@@ -29,6 +30,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	Button btnTestAuth = null;
 	Button btnDeveloper = null;
 	View layTrain = null;
+	TextView tvTrainDesc = null;
 	
 	final String life_tag = "MainActivity"; 
 	
@@ -50,6 +52,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		this.btnUserManager = (Button) super.findViewById(R.id.btn_user_manager);
 		this.btnTestAuth = (Button) super.findViewById(R.id.btn_test_auth);
 		this.btnDeveloper = (Button) super.findViewById(R.id.btn_record_30);
+		this.tvTrainDesc = (TextView) super.findViewById(R.id.tv_train_desc);
 		layTrain = super.findViewById(R.id.layout_train);
 		
 		this.btnModifyPwd.setOnClickListener(this);
@@ -80,13 +83,14 @@ public class MainActivity extends Activity implements OnClickListener {
 			Cfg.getInstance().setUserName(userName);
 		}
 		
-		userCheck();
+//		userCheck();
 	}
 	
 	@Override
 	protected void onStart() {
 		super.onStart();
 		Log.v(life_tag, "onStart");
+		userCheck();
 	}
 	
 	@Override
@@ -135,17 +139,19 @@ public class MainActivity extends Activity implements OnClickListener {
 		String userFileDir = rootDir + Cfg.getInstance().getUsersPath() + File.separator
 				+ username + File.separator;
 		File userDir = new File(userFileDir);
-		Log.d("userDir", userDir.getName());
+		Log.d("userDir", userFileDir);
 		if (!userDir.exists())
 			userDir.mkdirs();
 		
-		File featrue = new File(userFileDir + username + File.separator + Cfg.getInstance().getFeaSuf());
-		File model = new File(userFileDir + username + File.separator + Cfg.getInstance().getMdlSuf());
+		File featrue = new File(userFileDir + username + Cfg.getInstance().getFeaSuf());
+		File model = new File(userFileDir + username + Cfg.getInstance().getMdlSuf());
 		if ( featrue.exists() && model.exists() ) {
 			trained = true;
+			tvTrainDesc.setText("ÒÑÑµÁ·");
 		}
 		else {
 			trained = false;
+			tvTrainDesc.setText("ÉÐÎ´ÑµÁ·");
 		}
 		Log.d("trained", ""+trained);
 	}

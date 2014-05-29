@@ -41,7 +41,7 @@
     <string name="train_not_start">训练尚未开始</string>
     <string name="test_auth">测试认证</string>
     <string name="welcome">欢迎</string>
-    <string name="left_time">60秒</string>
+    <string name="left_time">30秒</string>
     <string name="not_trained">尚未训练</string>
     <string name="record_30_sec">录制30秒</string>
     <string name="record_10_sec">录制10秒</string>

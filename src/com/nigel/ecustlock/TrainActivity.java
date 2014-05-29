@@ -49,6 +49,7 @@ public class TrainActivity extends Activity {
 	
 	MfccTask mfccTask = null;
 	TrainBroadcastReceiver trainReceiver = new TrainBroadcastReceiver();
+	int trainTime = 30;
 
 	String ac_tag = "TrainActivity";
 	@Override
@@ -187,7 +188,7 @@ public class TrainActivity extends Activity {
 							// Start lengthy operation in a background thread
 					         new Thread(new Runnable() {
 					             public void run() {
-					                 while (mProgressStatus < 60) {
+					                 while (mProgressStatus < trainTime) {
 					                     mProgressStatus++;
 					                     try {
 											Thread.sleep(1000);
@@ -198,9 +199,9 @@ public class TrainActivity extends Activity {
 					                     // Update the progress bar
 					                     mHandler.post(new Runnable() {
 					                         public void run() {
-					                             pbTrainTime.setProgress(mProgressStatus * 5 / 3);
-					                             tvLeftTime.setText("" + (60 - mProgressStatus) + "Ãë");
-					                             if (mProgressStatus == 60) {
+					                             pbTrainTime.setProgress(mProgressStatus * 100 / trainTime);
+					                             tvLeftTime.setText("" + (trainTime - mProgressStatus) + "Ãë");
+					                             if (mProgressStatus == trainTime) {
 					                            	 if (audioRecord != null) {
 					                            		 isRecording = false;
 					                            		 audioRecord.stop();

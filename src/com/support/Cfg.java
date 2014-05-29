@@ -10,7 +10,7 @@ public class Cfg {
 	 * 	 |-world
 	 */
 	String rootDir = ".";
-	String dirLists[] = {"world", "tmp", "users"};
+	String dirLists[] = {"world", "tmp", "users", "developer"};
 	
 	String tmpPath = "tmp";
 	String worldMdlPath = "world";
