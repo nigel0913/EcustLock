@@ -68,6 +68,9 @@ public class MainActivity extends Activity implements OnClickListener {
 		if ( userName.equals("admin") ) {
 			this.btnUserManager.setVisibility(View.VISIBLE);
 			this.switchLayout.setVisibility(View.VISIBLE);
+			this.btnConfig.setVisibility(View.VISIBLE);
+			this.btnDeveloper.setVisibility(View.VISIBLE);
+			
 			this.btnUserManager.setOnClickListener(this);
 //			if (LockService.isRunning(getApplicationContext())) {
 			if (LockService.getStatus() == LockService.Status.RUNNING) {
@@ -80,6 +83,11 @@ public class MainActivity extends Activity implements OnClickListener {
 			Cfg.getInstance().setUserName(userName);
 		}
 		else {
+			this.btnUserManager.setVisibility(View.GONE);
+			this.switchLayout.setVisibility(View.GONE);
+			this.btnConfig.setVisibility(View.GONE);
+			this.btnDeveloper.setVisibility(View.GONE);
+			
 			Cfg.getInstance().setUserName(userName);
 		}
 		
