@@ -51,6 +51,8 @@
     <string name="train_one">训练单个用户</string>
     <string name="calculate_all">计算所有得分</string>
     <string name="developer_mode">开发者模式</string>
+    <string name="please_input_password">请输入密码</string>
+    <string name="numerical_password">转到数字密码模式</string>
     
 
 </resources>

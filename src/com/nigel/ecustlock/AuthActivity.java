@@ -24,13 +24,19 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.text.method.TextKeyListener;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -46,6 +52,7 @@ public class AuthActivity extends Activity
 	ProgressBar pbLoading;
 	TextView timeView = null;
 	TextView dateView = null;
+	EditText etAuthPwd;
 	DecimalFormat decimalFormat;
 	static String[] weekDaysName = { "星期日", "星期一", "星期二", "星期三", "星期四", "星期五",
 				"星期六" };
@@ -74,6 +81,12 @@ public class AuthActivity extends Activity
 	float threshold;
 	float highest;
 	
+	Button btnSlide = null;
+	boolean isPasswordLayout = false;
+	
+	View layoutPassword;
+	View layoutRecognition;
+	
 	final String ac_tag = "AuthActivity";
 	
 	
@@ -96,11 +109,17 @@ public class AuthActivity extends Activity
 		pbLoading = (ProgressBar) super.findViewById(R.id.loading_spinner);
 		timeView = (TextView) super.findViewById(R.id.tv_time);
 		dateView = (TextView) super.findViewById(R.id.tv_date);
+		btnSlide = (Button) super.findViewById(R.id.btn_slide);
+		layoutPassword = super.findViewById(R.id.layout_password);
+		layoutRecognition = super.findViewById(R.id.layout_recognition);
+		etAuthPwd = (EditText) super.findViewById(R.id.et_auth_password);
 		
 		decimalFormat = new DecimalFormat("00");
 		
 		btnAuth.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 		btnAuth.setOnTouchListener(this);
+		btnSlide.setOnClickListener(this);
+		
 		tvWelcome.setText("请按住录解锁键录音");
 		
 		ivAvatar.setVisibility(View.INVISIBLE);
@@ -112,6 +131,18 @@ public class AuthActivity extends Activity
         
 		SqlOpenHelper helper = new SqlOpenHelper(getApplicationContext());
 		database = helper.getReadableDatabase();
+		
+		String[] columns = {SqlOpenHelper.USER_PWD};
+		String[] params = {"admin"};
+		Cursor result = database.query(SqlOpenHelper.TABLE_USERINFO, columns, SqlOpenHelper.USER_NAME + "=?", params, null, null, null);
+		result.moveToFirst();
+		String pwd = "0000";
+		while (!result.isAfterLast()) {
+			pwd = result.getString(0);
+			result.moveToNext();
+		}
+		result.close();
+		etAuthPwd.addTextChangedListener(new PasswordCheck(pwd));
 		
 		rootDir = Cfg.getInstance().getRootDir();
 		tmpPath = rootDir + Cfg.getInstance().getTmpPath() + File.separator;
@@ -127,7 +158,34 @@ public class AuthActivity extends Activity
 		switch (v.getId()) {
 			case R.id.tv_test_info:
 				break;
+			case R.id.btn_slide:
+				if (isPasswordLayout) {
+					btnSlide.setText(getString(R.string.numerical_password));
+					isPasswordLayout = false;
+					layoutPassword.setVisibility(View.INVISIBLE);
+					layoutRecognition.setVisibility(View.VISIBLE);
+				}
+				else {
+					btnSlide.setText("转到声纹识别模式");
+					isPasswordLayout = true;
+					layoutRecognition.setVisibility(View.INVISIBLE);
+					layoutPassword.setVisibility(View.VISIBLE);
+				}
+				break;
 		}
+	}
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+//		Log.i(ac_tag, "");
+		switch (keyCode) {
+		case KeyEvent.KEYCODE_BACK:
+			// return true 表示屏蔽返回键
+			return false;
+		case KeyEvent.KEYCODE_MENU:
+			return false;
+		}
+		return super.onKeyDown(keyCode, event);
 	}
 
 	@Override
@@ -227,6 +285,33 @@ public class AuthActivity extends Activity
 		super.onDestroy();
 		
 		database.close();
+	}
+	
+	public class PasswordCheck implements TextWatcher {
+
+		String password;
+		
+		public PasswordCheck(String pwd){
+			password = pwd;
+		}
+		
+		@Override
+		public void afterTextChanged(Editable s) {
+			String inputpwd = s.toString();
+			if (inputpwd.equals(password)) {
+				Toast.makeText(getApplicationContext(), "欢迎", Toast.LENGTH_SHORT).show();
+				AuthActivity.this.finish();
+			}
+		}
+
+		@Override
+		public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+		}
+
+		@Override
+		public void onTextChanged(CharSequence s, int start, int before, int count) {
+		}
+		
 	}
 	
 	public class AuthTask extends AsyncTask<Void, String, String> {

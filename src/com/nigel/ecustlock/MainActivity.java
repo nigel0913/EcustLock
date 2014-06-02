@@ -53,6 +53,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		this.btnTestAuth = (Button) super.findViewById(R.id.btn_test_auth);
 		this.btnDeveloper = (Button) super.findViewById(R.id.btn_record_30);
 		this.tvTrainDesc = (TextView) super.findViewById(R.id.tv_train_desc);
+
 		layTrain = super.findViewById(R.id.layout_train);
 		
 		this.btnModifyPwd.setOnClickListener(this);
@@ -61,6 +62,7 @@ public class MainActivity extends Activity implements OnClickListener {
 //		this.btnMfccTest.setOnClickListener(this);
 		this.btnTestAuth.setOnClickListener(this);
 		this.btnDeveloper.setOnClickListener(this);
+		
 		layTrain.setOnClickListener(this);
 
 		Intent intent = getIntent();
@@ -91,7 +93,6 @@ public class MainActivity extends Activity implements OnClickListener {
 			Cfg.getInstance().setUserName(userName);
 		}
 		
-//		userCheck();
 	}
 	
 	@Override

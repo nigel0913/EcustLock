@@ -31,11 +31,12 @@
     </RelativeLayout>
 
     <RelativeLayout
-        android:id="@+id/relativeLayout2"
+        android:id="@+id/layout_recognition"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/relativeLayout3"
-        android:layout_below="@id/relativeLayout1" >
+        android:layout_below="@id/relativeLayout1"
+        android:visibility="visible" >
 
         <TextView
             android:id="@+id/tv_test_info"
@@ -62,35 +63,82 @@
             style="?android:progressBarStyleLarge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/auth_avater_big"
             android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true" />
+            android:layout_marginBottom="59dp" />
 
         <TextView
             android:id="@+id/tv_welcome"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/auth_avater_big"
-            android:layout_centerHorizontal="true"
+            android:layout_alignBottom="@+id/auth_avater_big"
+            android:layout_alignParentLeft="true"
+            android:layout_marginBottom="24dp"
             android:gravity="center"
             android:text="@string/welcome"
             android:textSize="20sp" />
 
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@id/relativeLayout3"
-        android:layout_width="match_parent"
-        android:layout_height="128dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true" >
-
         <com.nigel.custom.MicButton
             android:id="@+id/micButton1"
             android:layout_width="128dp"
-            android:layout_height="match_parent"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true" />
+            android:layout_height="128dp"
+            android:layout_alignTop="@+id/tv_welcome"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="22dp" />
 
     </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/layout_password"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/relativeLayout3"
+        android:layout_below="@id/relativeLayout1"
+        android:visibility="invisible" >
+
+        <EditText
+            android:id="@+id/et_auth_password"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:ems="10"
+            android:gravity="center"
+            android:inputType="textPassword"
+            android:maxLength="8" />
+
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/et_auth_password"
+            android:layout_alignParentLeft="true"
+            android:gravity="center"
+            android:text="@string/please_input_password"
+            android:textSize="18sp" />
+
+    </RelativeLayout>
+    
+    <RelativeLayout
+        android:id="@id/relativeLayout3"
+        android:layout_width="match_parent"
+        android:layout_height="32dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true" >
+
+        <Button
+            android:id="@+id/btn_slide"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:text="@string/numerical_password" />
+
+    </RelativeLayout>
+
+
 
 </RelativeLayout>
