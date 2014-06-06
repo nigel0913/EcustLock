@@ -78,7 +78,6 @@ public class UsersActivity extends Activity {
 				oldPosition = groupPosition;
 			}
 			
-		
 		});
 	}
 	
@@ -100,6 +99,11 @@ public class UsersActivity extends Activity {
 				File.separator + name + File.separator);
 		if (userDir.exists()) {
 			FileAccess.deleteDirectory(userDir);
+		}
+		
+		if (oldPosition != -1) {
+			userListView.collapseGroup(oldPosition);
+			oldPosition = -1;
 		}
 		
 		return true;

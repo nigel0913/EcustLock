@@ -82,6 +82,11 @@ public class RegisterActivity extends Activity implements OnClickListener {
 			return ;
 		}
 		
+		if (pwd1.length() < 4) {
+			Toast.makeText(getApplicationContext(), "密码长度不能小于4", Toast.LENGTH_SHORT).show();
+			return ;
+		}
+		
 		ContentValues values = new ContentValues();
 		values.put("username", name);
 		values.put("password", pwd1);

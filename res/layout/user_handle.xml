@@ -11,7 +11,8 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:text="@string/modify_password"
-        android:textSize="14sp" />
+        android:textSize="14sp"
+        android:visibility="invisible" />
 
     <Button
         android:id="@+id/btn_delete_user"

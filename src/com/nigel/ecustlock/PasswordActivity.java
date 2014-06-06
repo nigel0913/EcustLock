@@ -87,6 +87,12 @@ public class PasswordActivity extends Activity {
 				return ;
 			}
 			
+			if (sPwdNew.length() < 4) {
+				Toast.makeText(getApplicationContext(), "密码长度不能小于4", Toast.LENGTH_SHORT).show();
+				return ;
+			}
+			
+			
 			result.moveToFirst();
 			while ( !result.isAfterLast() ) {
 				String pwd = result.getString(1);

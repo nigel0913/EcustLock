@@ -53,9 +53,9 @@ public class UserExpandableListAdapter extends BaseExpandableListAdapter {
 			@Override
 			public void onClick(View v) {
 				AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                builder.setMessage("Do you want to remove?");
+                builder.setMessage("删除该用户吗?");
                 builder.setCancelable(false);
-                builder.setPositiveButton("Yes",
+                builder.setPositiveButton("是",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
 //                                List<String> child =
@@ -69,7 +69,7 @@ public class UserExpandableListAdapter extends BaseExpandableListAdapter {
                                 notifyDataSetChanged();
                             }
                         });
-                builder.setNegativeButton("No",
+                builder.setNegativeButton("否",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();

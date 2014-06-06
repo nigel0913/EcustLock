@@ -89,7 +89,7 @@ public class AuthActivity extends Activity
 	
 	final String ac_tag = "AuthActivity";
 	
-	
+//	public static final int FLAG_HOMEKEY_DISPATCHED = 0x80000000;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -100,6 +100,7 @@ public class AuthActivity extends Activity
 				| WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON | WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		// | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 		win.setAttributes(winParams);
+//		this.getWindow().setFlags(FLAG_HOMEKEY_DISPATCHED, FLAG_HOMEKEY_DISPATCHED);
 		setContentView(R.layout.activity_auth);
 		
 		btnAuth = (MicButton) super.findViewById(R.id.micButton1);
@@ -184,6 +185,9 @@ public class AuthActivity extends Activity
 			return false;
 		case KeyEvent.KEYCODE_MENU:
 			return false;
+//		case KeyEvent.KEYCODE_HOME:
+//			Toast.makeText(getApplicationContext(), "Home", Toast.LENGTH_SHORT).show();
+//			return true;
 		}
 		return super.onKeyDown(keyCode, event);
 	}
