@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import android.util.Log;
 
+//√ª”–”√
 
 public class GetMfcc {
 
